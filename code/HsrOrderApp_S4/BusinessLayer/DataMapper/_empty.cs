@@ -1,0 +1,3 @@
+namespace HsrOrderApp.BusinessLayer.DataMapper
+{
+}

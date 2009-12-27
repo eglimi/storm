@@ -1,0 +1,54 @@
+\chapter{Requirements Overview}
+
+	\section{\textit{STORM} external}
+		The main advantage of using a tool like \textit{STORM} is the time savings in
+		project developments and the accuracy of the generated code. This in mind, the
+		following requirements are specified:
+		
+		\begin{itemize}
+			\item Mapping between the in-memory objects and the database tables is done automatically.
+			\item Easy and understandable configuration and usage.
+			\item There are no other dependencies than to CodeSmith, such that \textit{STORM} can
+						be used independently.
+			\item Is integrated in the make process of the Visual Studio .NET.
+			\item Can also be used without Visual Studio .NET.
+			\item The resulting program is efficient regarding network performance.
+		\end{itemize}
+		
+		This is one would expect from this framework.
+		Because it is not always easy to write templates for a general purpose,
+		it is important to keep the target in mind. A framework like \textit{STORM}
+		cannot cover all requirements which can occur in any project. An exactly
+		defined boundary is needed. This boundary defines which problems can be solved
+		with \textit{STORM}. It is described in the next section and in more
+		detail in later chapters. The above requirements are of general nature and
+		apply to every project which uses the technique of generative programming in
+		the scope of an O/R Mapper.
+	
+	\section{\textit{STORM} internal}
+		These requirements are more specific and could be called ``features of
+		\textit{STORM}''. They are not directly connected with the usage of the 
+		framework but affect the design of it. This list of features could
+		be extended in many ways but it is a good starting point:
+		
+		\begin{itemize}
+			\item No dependencies between the framework, the generated code and the code which
+						uses them (namely a client) may exist.
+			\item A locking mechanism is implemented.
+			\item Insert, update and delete statements are handled by the framework and
+						executed in the right order.
+			\item SQL code is hidden from the user and generated automatically.
+			\item Custom finder methods can be defined.
+			\item Custom constructors can be defined.
+			\item Transferred objects are stored to minimize remote calls.
+			\item Data integrity is ensured.
+			\item A well defined set of database mapping types are supported.
+		\end{itemize}
+		
+		Most of these requirements are not easy to implement but even though, they are very
+		important in terms of the usability of the framework. These requirements are
+		a starting point for the whole design. Every one will be discussed in detail
+		in this document.
+		
+		Because most of the above requirements can be solved by using and applying 
+		appropriate patterns, the next section is devoted to these patterns.

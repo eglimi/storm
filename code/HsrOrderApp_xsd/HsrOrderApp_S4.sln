@@ -1,0 +1,37 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLayer", "BusinessLayer\BusinessLayer.csproj", "{0B7DEC8E-E422-466A-A0E7-8C80DC44B96E}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAppConsole", "TestAppConsole\TestAppConsole.csproj", "{23B76876-259D-4514-8469-E4437F90F71B}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XsdParser", "XsdParser\XsdParser.csproj", "{4F5FE499-587D-4A19-A0F0-AA58C08FD6BD}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{0B7DEC8E-E422-466A-A0E7-8C80DC44B96E}.Debug.ActiveCfg = Debug|.NET
+		{0B7DEC8E-E422-466A-A0E7-8C80DC44B96E}.Debug.Build.0 = Debug|.NET
+		{0B7DEC8E-E422-466A-A0E7-8C80DC44B96E}.Release.ActiveCfg = Release|.NET
+		{0B7DEC8E-E422-466A-A0E7-8C80DC44B96E}.Release.Build.0 = Release|.NET
+		{23B76876-259D-4514-8469-E4437F90F71B}.Debug.ActiveCfg = Debug|.NET
+		{23B76876-259D-4514-8469-E4437F90F71B}.Debug.Build.0 = Debug|.NET
+		{23B76876-259D-4514-8469-E4437F90F71B}.Release.ActiveCfg = Release|.NET
+		{23B76876-259D-4514-8469-E4437F90F71B}.Release.Build.0 = Release|.NET
+		{4F5FE499-587D-4A19-A0F0-AA58C08FD6BD}.Debug.ActiveCfg = Debug|.NET
+		{4F5FE499-587D-4A19-A0F0-AA58C08FD6BD}.Debug.Build.0 = Debug|.NET
+		{4F5FE499-587D-4A19-A0F0-AA58C08FD6BD}.Release.ActiveCfg = Release|.NET
+		{4F5FE499-587D-4A19-A0F0-AA58C08FD6BD}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

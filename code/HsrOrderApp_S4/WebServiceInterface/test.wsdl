@@ -1,0 +1,28 @@
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:y="http://HsrOrderApp_S3/Test" targetNamespace="http://HsrOrderApp_S3/Test">
+	<message name="TestMessage">
+		<part name="TestParam" type="xs:base64Binary"/>
+	</message>
+	<message name="TestMessageResponse"/>
+	<portType name="TestPortType">
+		<operation name="TestOperation">
+			<input name="TestMessage" message="y:TestMessage"/>
+			<output name="TestMessageResponse" message="y:TestMessageResponse"/>
+		</operation>
+	</portType>
+	<binding name="bindingName" type="y:TestPortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="TestOperation">
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="TestService">
+		<port name="NewPort" binding="y:bindingName">
+			<soap:address location="No Target Adress"/>
+		</port>
+	</service>
+</definitions>

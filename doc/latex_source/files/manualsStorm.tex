@@ -1,0 +1,421 @@
+\chapter{STORM}
+	
+	\section{Einleitung}
+		Dieses Kapitel gibt eine Anleitung dazu, wie eine Applikation mit \textit{STORM}
+		erstellt werden kann. Der Grund dafür ist, dass die Verwendung der Attribute
+		nicht ganz selbsterklärend ist. Die Attribute selbst wurden im technischen
+		Bericht bereits beschrieben. Das wird hier nicht wiederholt.
+		
+	\section{Vorbereitung}
+		\subsection{CodeSmith}
+			Zuerst muss CodeSmith auf dem Rechner installiert werden. Das Tool kann
+			von \url{http://www.ericjsmith.net/codesmith/download.aspx} bezogen werden.
+			Die Installation selbst sollte kein Problem darstellen.
+		
+		\subsection{Projekt erstellen}
+			Als nächster Schritt wird ein neues Projekt oder eine neue Solution vom
+			gewünschten Typ im Visual Studio .NET erstellt. Vorteilhaft ist es, wenn
+			im neuen Projekt ein Ordner für die Domain Objekte angelegt wird. Dies ist 
+			zwar nicht nötig, aber dient der besseren Übersicht. Ebenso ist es nützlich,
+			gleich einen Ordner für die Domain Objekt Implementationen und für die 
+			Mapper Implementation zu machen.
+			
+		\subsection{Library und Templates}
+			\textit{STORM} beinhaltet zwei Templates, die für die Code Generierung benötigt
+			werden. Dies sind \verb~ImplGen.cst~ und \verb~MapperGen.cst~. Diese können 
+			grund\-sätzlich	überall auf der lokalen Festplatte liegen. Es ist aber wiederum 
+			ratsam, einen	eigenen Ordner im aktuellen Projekt zu erstellen und die beiden 
+			Dateien in diesen Ordner zu kopieren.
+			
+			Des weiteren muss die STORM-Library (\verb~Storm.dll~) in das von CodeSmith erstellte
+			Verzeichnis kopiert werden. Dies ist leider nötig, da CodeSmith bei der Code Generierung
+			auch dann die Dll nicht findet, wenn sie im GAC registriert wurde. Aktuell ist dieses
+			CodeSmith Verzeichnis:
+			\begin{Verbatim}
+C:\Program Files\CodeSmith\v2.2\
+			\end{Verbatim}
+			Dies kann aber je nach lokalen Einstellungen und CodeSmith Version variieren.
+			
+			Um eine Applikation mit \textit{STORM} entwickeln zu können, muss die Library zusätzlich vom aktuellen
+			Projekt referenziert werden. Dazu wird die Datei (\verb~Storm.dll~) im Visual Studio .NET
+			unter dem Punkt \verb~References~ $\rightarrow$ \verb~Add References...~ $\rightarrow$
+			\verb~Browse~ angegeben.
+			
+			Figur	\ref{fig:vsdotnetSolutionExplorer} ist ein Beispiel wie eine Solution nach 
+			diesen Schritten aussehen sollte.
+		
+			\begin{figure}[htb]
+				\begin{center}
+					\includegraphics[width=4.5cm]{./files/inc/figures/vsdotnetSolutionExplorer}
+					\caption{\label{fig:vsdotnetSolutionExplorer} Solution Explorer nach der Vorbereitung}
+				\end{center}
+			\end{figure}		
+		
+		\section{Abstrakte Klassen}
+		
+			Wenn alle Vorbereitungen abgeschlossen sind, kann man beginnen, die abstrakten Klassen 
+			zu schreiben. Natürlich muss vorher das Design der Applikation feststehen.
+			Für jede Tabelle in der Datenbank muss eine Abstrakte Klasse geschrieben werden.
+			Diese Klasse wird nachher mit den von \textit{STORM} definierten Attributen versehen.
+			
+			\subsection{Übersicht}
+				Hier eine Übersicht der behandelten Themen in diesem Kapitel:
+				\LTXtable{\linewidth}{./files/inc/tables/manualThemen}
+				
+			
+			\subsection{Namespaces}
+			\label{subsec:manualNamespaces}
+				Um mit den von \textit{STORM} angebotenen Klassen arbeiten zu können, müssen als Erstes zwei
+				Namespaces in der abstrakten Klasse eingebunden werden:
+				\begin{lstlisting}[language={[Sharp]C},caption=Namespaces einbinden,
+					label=lst:namespaces]
+using Storm.Attributes;
+using Storm.Lib;
+				\end{lstlisting}
+			
+			\subsection{Klassen-Attribute}
+			\label{subsec:manualKlassen}
+				Es gibt verschiedene Typen von Attributen. Einige sind für die Attributierung
+				der Klassen vorgesehen, andere für Methoden, etc.
+				Hier beginnen wir sinnvollerweise mit der Attributierung einer abstrakten Hauptklasse.
+				Die Bezeichnung Hauptklasse verwenden wir deshalb, weil es Klassen innerhalb dieser
+				Klasse geben kann. Die folgende Liste beschreibt alle Attribute die für eine Hauptklasse
+				verwendet werden. Es müssen alle Attribute angegeben werden.
+				
+				\begin{itemize}
+					\item Table(string tableName, bool keyIsSurrogate)\\
+					Wird benötigt um das Mapping zwischen einer Klasse und einer Tabelle zu machen. Zu jeder Klasse
+					gehört eine Tabelle in der Datenbank.
+					\begin{description}
+						\item[tableName] Der Name der Tabelle in der Datenbank, auf die diese Klasse gemappt werden soll.
+						\item[keyIsSurrogate] Definiert ob ein Key surrogate, also künstlich ist oder nicht. Falls \verb~true~
+																	angegeben wird, darf in der Klasse nur ein Primary Key definiert werden. Ansonsten
+																	dürfen mehrere Primary Keys definiert werden.
+					\end{description}
+					\item VersionField(string fieldName)\\
+					Das Versionen Feld wird benötigt um die Aktualität der gespeicherten Objekte zu überprüfen.
+					\begin{description}
+						\item[fieldName] Der Name des Feldes in der Datenbank. Erwartet wird hier ein Feld vom Typ 
+														 \verb~timestamp~. Dies entspricht einer binären Nummer, die garantiert über 
+														 die ganze Datenbank eindeutig ist.
+					\end{description}
+					\item GenerateCode()\\
+					Dieses Attribut wurde zur Sicherheit eingeführt. Es muss angegeben werden, falls Code
+					für diese Klasse generiert werden sollte. Falls dieses Attribut fehlt, wird die Klasse
+					von \textit{STORM} ignoriert.
+				\end{itemize}
+				
+				Listing \ref{lst:hauptklasse} zeigt ein Beispiel für eine Deklaration einer Hauptklasse.
+				Zu Beachten ist dabei auch, dass die Hauptklasse von \verb~DomainObject~ abgeleitet
+				sein muss.
+				
+				\begin{lstlisting}[language={[Sharp]C},caption=Definition einer Hauptklasse,
+					label=lst:hauptklasse]
+[Table("Persons", true),
+VersionField("chTimestamp"),
+GenerateCode]
+public abstract class Person : DomainObject
+{
+ ...
+}	
+				\end{lstlisting}
+				
+			\subsection{interne Klassen}
+			\label{subsec:manualInterneKlassen}
+				Wie oben angedeutet, ist es möglich bzw. nötig, Klassen innerhalb der Hauptklasse
+				zu deklarieren. Dies ist möglich für zwei Fälle:
+				\begin{itemize}
+					\item Eine Factory Klasse kann deklariert werden. Diese wird dazu benutzt, eigene Konstruktoren
+								zu erstellen. Falls diese Klasse nicht definiert wurde, kann nur der von \textit{STORM}
+								definierte Konstruktor aufgerufen werden.
+					\item Eine Finder Klasse kann deklariert werden. Diese Klasse dient dazu, eigene Suchmethoden
+								zu definieren. Von \textit{STORM} sind die drei Funktionen \verb~find~, \verb~findAll~ und
+								\verb~findById~ vordefiniert. Diese können auch aufgerufen werden, wenn die Finder Klasse nicht
+								deklariert wurde. Der \verb~find~ Methode kann ein QueryObject mitgegeben werden. Damit ist dieser
+								Aufruf an sich schon sehr flexibel. Trotzdem ist es aber in manchen Fällen angenehmer, eigene
+								Methoden aufrufen zu können.
+				\end{itemize}
+				
+				Factory Klassen müssen das Attribute Factory haben. Innerhalb dieser Klasse werden
+				selbst definierte Konstruktoren definiert. Zu Beachten gilt, dass die Klasse
+				als abstrakt deklariert werden muss. Ein Beispiel für eine Factory Klasse ist das
+				folgende Listing:
+				
+				\begin{lstlisting}[language={[Sharp]C},caption=Definition Factory Klasse]
+public abstract class Person : DomainObject
+{	
+	[Factory]
+	public abstract class PersonFactory
+	{
+		public abstract Person createPerson(
+			[ParameterDef("Name")] string name,
+			[ParameterDef("Password")] string password);
+	}
+}
+				\end{lstlisting}
+				
+				Es können beliebig viele solcher Konstruktoren deklariert werden. Damit klar ist, worauf sich
+				ein Parameter einer solchen Methode bezieht, muss pro Parameter ein ParameterDef Attribute
+				angegeben werden. Die Bedeutung der benutzten Attribute ist Folgende:
+				\begin{itemize}
+				\item Factory()\\
+				Das Attribute gibt an, dass die folgende Klasse eine interne Klasse der Hauptklasse ist
+				und dass eine Factory Klasse folgt. In einer Factory Klasse können selbst definierte Konstruktoren
+				deklariert werden.
+				\item ParameterDef(string propertyName)\\
+				Beschreibt einen Parameter einer Methode. Jedem Parameter muss ein solches Attribut vorangehen.
+					\begin{description}
+						\item[propertyName] Gibt an, auf welches Property sich dieser Parameter bezieht. Das Property
+																muss in der Hauptklasse existieren. Properties sind in Abschnitt 
+																\ref{subsec:manualProps} Beschrieben.
+					\end{description}
+				\end{itemize}
+			
+			Finder Klassen können sehr ähnlich deklariert werden. Sie müssen ebenfalls abstrakt sein.
+			 Ein Beispiel ist nachstehend angegeben:
+			
+			\begin{lstlisting}[language={[Sharp]C},caption=Definition Factory Klasse]
+public abstract class Person : DomainObject
+{	
+	[Finder]
+	public abstract class PersonFinder
+	{
+		public abstract IList findByNameAndPassword(
+			[ParameterDef("Name")] string name,
+			[ParameterDef("Password")] string password);
+	}
+}
+			\end{lstlisting}
+			
+			Im Gegensatz zu den Factory Methoden, muss bei einer Finder Klasse das Finder Attribut angegeben
+			werden. Dieses Attribut gibt an, dass die darauf folgenden Klasse selbst definierte
+			Finder Methoden enthält. Das ParameterDef Attribute wurde bereits beschrieben und muss auch hier
+			pro Parameter angegeben werden.
+			
+		\subsection{Properties}
+		\label{subsec:manualProps}
+			Für jede Kolonne in der Datenbank muss ein Property in der abstrakten Klasse deklariert werden.
+			Falls ein Property nicht angegeben wird, ist auch die Kolonne in der Datenbank nicht benutzbar.
+			Zusätzlich kann es zu Schwierigkeiten führen, falls das Attribut benötigt wird (z.B. für Relationen).
+			Ein Beispiel einer Deklaration eines Property ist folgendes:
+			
+			\begin{lstlisting}[language={[Sharp]C},caption=Definition eines Property]
+[Column("Name")]
+public abstract string Name {get; set;}					
+			\end{lstlisting}
+			
+			Properties müssen abstrakt sein. Sie werden im generierten Code implementiert. Es kann mit \verb~get;~
+			bzw. \verb~set;~ angegeben werden, was von einem Property implementiert werden soll. Falls von einem
+			anderen Attribut (z.B. ParameterDef Attribut) auf ein Property verwiesen wird, muss das Property eine
+			\verb~set~ Methode haben. Column ist das einzige Attribut das zwingend ist. Die Bedeutung
+			ist folgende:
+			\begin{itemize}
+				\item Column(string dbColumn)\\
+				Dieses Attribut wird verwendet, um ein Property auf eine Kolonne in der Datenbank zu mappen.
+				\begin{description}
+					\item[dbColumn] Der Name der dazugehörenden Kolonne in der Datenbank.
+				\end{description}
+			\end{itemize}
+			
+		\subsection{Primary Key(s)}
+		\label{subsec:manualPrimaryKeys}
+			Ein Primary Key wird wie ein Property (\ref{subsec:manualProps}) deklariert. Zusätzlich zu 
+			einem gewöhnlichen Property kommt aber noch ein PrimaryKey Attribut hinzu. Falls im Table
+			Attribut \verb~isSurrogateKey~ als \verb~false~ gesetzt wurde, können mehrere
+			Properties das Attribut PrimaryKey haben.	Ansonsten darf dieses Attribut nur einmal verwendet
+			werden. Dieses Attribut hat keine Parameter.
+			Ein Beispiel einer Deklaration eines Primary Keys ist folgendes:
+			
+			\begin{lstlisting}[language={[Sharp]C},caption=Definition eines Property]
+[Column("PersonID"), PrimaryKey]
+public abstract int PersonId {get;}
+			\end{lstlisting}
+			
+		\subsection{ToMany Relation}
+		\label{subsec:manualToMany}
+			Eine ToMany Relation wird ebenfalls mit einem Property deklariert. Es ist aber
+			kein Column Attribute nötig, da diese Relation auf eine andere Klasse verweist.
+			Eine ToMany Relation ist eine one-to-many Relation. Für jede ToMany Relation
+			muss es eine Adder Methode (\ref{subsec:manualAdder}) geben.
+			
+			\begin{lstlisting}[language={[Sharp]C},caption=Definition eines Property]
+[ToMany(typeof(Address), "Person")]
+public abstract IList Addresses {get;}
+			\end{lstlisting}
+			
+			Die Bedeutung des Attributes ist folgende:
+			\begin{itemize}
+				\item ToMany(Type relationTo, string relationName)\\
+				Dieses Attribut zeigt an, dass es sich beim diesem Property um eine one-to-many Relation handelt.
+				\begin{description}
+					\item[relationTo] 	Hier muss der Typ der Klasse angegeben werden, auf die sich die Relation bezieht,
+															also der to-many Teil der Relation.
+					\item[relationName] Dies gibt den Namen des Property in der Klasse an, auf die sich die Relation
+															bezieht. In dieser Klasse muss ein Property mit diesem Name existieren. Zudem
+															muss dieses Property ein ToOne Attribut besitzen.
+				\end{description}
+			\end{itemize}
+			
+		\subsection{ToOne Relation}
+		\label{subsec:manualToOne}
+			Eine ToOne Relation wird entweder für eine back-Referenz einer ToMany Relation oder für
+			eine one-to-one Relation benutzt. Es muss für \emph{jede} ToMany Relation auch eine
+			ToOne Relation geben. Das folgende Beispiel zeigt die Verwendung dieser beiden Attribute
+			für eine Person mit Adressen:
+			
+			\begin{lstlisting}[language={[Sharp]C},caption=Zusammenhang zwischen ToMany und ToOne Attribut]
+public abstract class Person : DomainObject
+{
+	[Column("PersonID"), PrimaryKey]
+	public abstract int PersonId {get;}
+
+	[ToMany(typeof(Address), "Person")]
+	public abstract IList Addresses {get;}
+}
+
+public abstract class Address : DomainObject
+{
+	[Column("PersonID"), ToOne(typeof(Person), "PersonId")]
+	public abstract Person Person {get; set;}
+}
+			\end{lstlisting}
+			
+			Zu Beachten gilt, dass das mit ToOne attributierte Property ein Column Attribute besitzen muss.
+			Zusätzlich muss das Property eine \verb~set~ Methode haben.
+			
+			Die Bedeutung des ToOne Attributes ist folgende:
+			
+			\begin{itemize}
+				\item ToOne(Type relationTo, string relationName)\\
+				Dieses Attribut zeigt an, dass es sich beim diesem Property entweder um eine one-to-one Relation oder
+				um eine back-Referenz einer one-to-many Relation handelt. Es muss ein Column Attribut und eine
+				\verb~set~ Methode deklariert werden.
+				\begin{description}
+					\item[relationTo] 	Hier muss der Typ der Klasse angegeben werden, auf die sich die Relation bezieht,
+															also der one-to Teil der Relation.
+					\item[relationName] Dies gibt den Namen des Property in der Klasse an, auf die sich die Relation
+															bezieht. Diese Relation muss sich auf einen Primary	Key beziehen (siehe Beispiel).
+				\end{description}
+			\end{itemize}
+			
+		\subsection{Adder Methoden}
+		\label{subsec:manualAdder}
+		
+			Bei ToMany Relationen darf beim Property keine \verb~set~ Methode deklariert werden, da der
+			Rückgabetyp nicht mit dem zu übergebenden Typ überein\-stimmt. Aus diesem Grund wurden
+			Adder Methoden eingeführt. Das bedeutet, es sollte für jede ToMany Relation auch 
+			eine Adder Methode definiert werden, um tatsächlich Objekte der Relation hinzufügen
+			zu können. Die Methode muss abstrakt sein. Ein Beispiel einer Deklaration 
+			einer solchen Adder Methode ist folgende:
+		
+			\begin{lstlisting}[language={[Sharp]C},caption=Zusammenhang zwischen ToMany und ToOne Attribut]
+public abstract class Person : DomainObject
+{
+	[ToMany(typeof(Address), "Person")]
+	public abstract IList Addresses {get;}
+	
+	[Adder("Addresses", "Person")]
+	public abstract void addAddress(Address a);		
+}
+			\end{lstlisting}
+		
+			Die Bedeutung des Attributes ist folgende:
+			
+			\begin{itemize}
+				\item Adder(string localProperty, string targetProperty)\\
+				Dieses Attribut wird in Ergänzung zu ToMany Relationen verwendet. Es dient dazu Methoden
+				deklarieren zu können, die es erlauben, einer ToMany Relationen Objekte hinzuzufügen.
+				\begin{description}
+					\item[localProperty] 	Der Name des Property, der die dazugehörende ToMany Relation deklariert.
+																Diese ist in derselben abstrakten Klasse.
+					\item[targetProperty] Dies gibt den Namen des Property in der Klasse an, auf die sich die ToMany Relation
+																bezieht. Dieser Name ist derselbe, der im ToMany Attribut angegeben wird.
+				\end{description}
+			\end{itemize}
+			
+		\subsection{Ein Beispiel}
+		\label{subsec:manualExample}
+			Da bis jetzt nur Ausschnitte aus der abstrakten Klasse gezeigt wurden, wird hier ein
+			zusammenhängendes Beispiel einer abstrakten Klasse gegeben. Es ist das Beispiel
+			einer Person:
+			
+			\begin{lstlisting}[language={[Sharp]C},caption=Zusammenhang zwischen ToMany und ToOne Attribut]
+[Table("Persons", true),
+	VersionField("chTimestamp"),
+	GenerateCode]
+public abstract class Person : DomainObject
+{	
+	[Factory]
+	public abstract class PersonFactory
+	{
+		public abstract Person createPerson(
+			[ParameterDef("Name")] string name,
+			[ParameterDef("Password")] string password);
+	}
+
+	[Finder]
+	public abstract class PersonFinder
+	{
+		public abstract IList findByName([ParameterDef("Name")] string name);
+		public abstract IList findByNameAndPassword(
+			[ParameterDef("Name")] string name,
+			[ParameterDef("Password")] string password);
+	}
+
+	[Column("PersonID"), PrimaryKey]
+	public abstract int PersonId {get;}
+
+	[Column("Name")]
+	public abstract string Name {get; set;}
+
+	[Column("Password")]
+	public abstract string Password {get; set;}
+	
+	[ToMany(typeof(Address), "Person")]
+	public abstract IList Addresses {get;}
+
+	[ToMany(typeof(Order), "Person")]
+	public abstract IList Orders {get;}
+
+	[Adder("Addresses", "Person")]
+	public abstract void addAddress(Address a);
+
+	[Adder("Orders", "Person")]
+	public abstract void addOrder(Order o);
+}		
+			\end{lstlisting}
+			
+		\subsection{Zusätzliche Methoden}
+		\label{subsec:manualAdditionalMethods}
+			In der abstrakten Klasse können natürlich auch Methoden implementiert werden. Diese werden
+			nicht attributiert und damit von \textit{STORM} ignoriert. Solche Methoden können
+			aber dennoch wie gewohnt benutzt werden.
+			
+	\section{Generieren und Kompilieren}
+		Nachdem alle abstrakten Klassen geschrieben wurden, kann das Projekt kompiliert werden. Falls
+		es ohne Fehler kompiliert, können die Domain Objekt Implementationen und die Mapper
+		Implementationen generiert werden. Da es für jede erstellte abstrakte Klasse jeweils
+		zwei Implementations-Klassen generiert werden, muss es entsprechend viele
+		XML Konfigurations-Dateien geben. Wie das aussehen könnte ist in Abbildung \ref{fig:vsdotnetFiles} gezeigt.
+		
+		\begin{figure}[htb]
+			\begin{center}
+				\includegraphics[width=4.5cm]{./files/inc/figures/vsdotnetFiles}
+				\caption{\label{fig:vsdotnetFiles} Solution Explorer mit den Konfigurations-Dateien}
+			\end{center}
+		\end{figure}
+		
+		Eine Beschreibung um den Code zu generieren ist im CodeSmith Manual ab Abschnitt 
+		\ref{sec:codeSmithGeneration} nachzuschlagen.
+		
+		Nachdem alle Klassen generiert wurden, muss das Visual Studio .NET geschlossen werden. Das
+		ist, weil CodeSmith die dll blockiert und deshalb kann nicht mehr darauf zugegriffen werden.
+		Nachdem das Projekt wieder geöffnet wurde, kann das gesamte Projekt, mit den erstellten Klassen,
+		kompiliert werden.
+		
+	\section{Arbeiten mit dem Projekt}
+		Es wurde bereits im technischen Bericht ein Beispiel gegeben, wie die Klassen
+		des neu erstellten Projektes benutzt werden können. Es wird deshalb hier nicht wiederholt, zumal
+		die Benutzung auch von den erstellten Abstrakten Klassen abhängt. Wichtig ist aber immer,
+		dass die generierten Klassen niemals direkt benutzt werden, sonder immer über die Factory
+		bezogen werden.

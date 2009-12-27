@@ -1,0 +1,51 @@
+\documentclass[a5paper, twoside]{report} %LaTeX Standard
+%\documentclass[a4paper, 11pt]{report} %LaTeX Standard
+
+%%style des dokumentes
+\input{./files/inc/style}
+
+%%dokument beginnen
+\begin{document}
+
+%%Add to bibliography without reference in the text
+\nocite{MSPatterns1}
+
+\pagenumbering{roman}
+
+\selectlanguage{english}
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+%%files einfügen
+\cleardoublepage
+\pagenumbering{arabic}
+
+\input{./files/techReportOverview}
+\input{./files/techReportFunctions}
+% \input{./files/techReportAnalysis}
+\input{./files/techReportPatterns}
+\input{./files/techReportDesignConsid}
+\input{./files/techReportCodeGeneration}
+\input{./files/techReportDesign}
+\input{./files/techReportSampleApp}
+\input{./files/techReportConclusion}
+	
+%%anhang als Text im kolumnetitel
+\renewcommand{\chaptermark}[1]{%
+\markboth{\appendixname\ \thechapter{}: #1}{}}
+\renewcommand{\sectionmark}[1]{%
+\markright{\thesection{}: #1}{}}
+
+%fix appendix bookmarks
+\pdfbookmark[-1]{Appendix}{\appendixname}
+
+\begin{appendix}
+%	\input{./files/tools}
+	\input{./files/inc/glossar}
+	\bibliography{./files/inc/references}
+%	\printindex
+\end{appendix}
+
+\end{document}

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+<codeSmith>
+	<namespace>BusinessLayer.DomainModel</namespace>
+	<imports>
+		<import namespace="System" />
+		<import namespace="System.Text" />
+		<import namespace="System.Collections" />
+		<import namespace="BusinessLayer.UnitOfWork" />
+	</imports>
+	<propertySets>
+		<propertySet>
+			<property name="XsdHelperName">BusinessLayer\DomainModel\BusinessObjects1.xsd</property>
+			<property name="ClassName">Address</property>
+		</propertySet>
+	</propertySets>
+	<template path="BusinessObjects.cst" />
+</codeSmith>

@@ -1,0 +1,44 @@
+\section{Sitzung 5 vom 18. November 2003}
+
+
+%-----
+\subsection{Teilnehmer}
+H. Huser (hhu), M. Egli (meg), M. Winiger (mwi)
+
+
+%-----
+\subsection{Themen}
+	\begin{itemize}
+		\item Generischer/generativer Ansatz
+		\item Enums, Lookup-Tables
+	\end{itemize}
+
+
+%-----
+\subsection{Generischer/generativer Ansatz}
+
+Es zeigt sich, dass der generative Ansatz viel aufwendiger 
+zu realisieren ist, als am Anfang angenommen. Es gibt sehr 
+viele Spezialfälle. Eine Applikation wie die HsrOrderApp 
+ist zu klein, dass sich der ernsthafte Einsatz von 
+Code-Generierung lohnen würde.
+
+
+%-----
+\subsection{Enums, Lookup-Tables}
+
+Enums sind einer dieser Spezialfälle. Es gibt verschiedene 
+Möglichkeiten diese auf die Datenbank zu mappen. Eine 
+Möglichkeit wären Lookup-Tables. Dabei werden die 
+Enum-Beschreibungen, mit eindeutigen IDs, in einzelnen oder 
+einer gemeinsamen Tabelle abgelegt.
+
+Eine entscheidende Rolle spielt für den Mapping-Code, wie 
+die Enums in der Datenbank abgelegt sind. Liegt ein 
+unveränderbares Datenbank-Schema vor, muss der Code mit 
+grosser Wahrscheinlichkeit spezifisch geschrieben werden.
+
+Abgesehen davon werden die Enums in der HsrOderApp-Datenbank 
+nicht sehr schön abgelegt. Sie sind nicht vollständig 
+normalisiert und somit redundant als VARCHAR abgelegt, was 
+das mapping noch ein Stück komplizierter macht

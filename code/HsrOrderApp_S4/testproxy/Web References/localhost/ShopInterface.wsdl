@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:i0="http://dotnet.hsr.ch/HsrOrderApp_S4" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" targetNamespace="http://dotnet.hsr.ch/HsrOrderApp_S4" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <import namespace="http://dotnet.hsr.ch/HsrOrderApp_S4" location="CGOpsMerged.xsd" />
+  <types />
+  <message name="GetPerson">
+    <part name="person" element="i0:PersonId" />
+  </message>
+  <message name="GetPersonResponse">
+    <part name="result" element="i0:PersonInfo" />
+  </message>
+  <message name="GetPersonByName">
+    <part name="person" element="i0:PersonName" />
+  </message>
+  <message name="GetPersonByNameResponse">
+    <part name="result" element="i0:Persons" />
+  </message>
+  <message name="GetPersons" />
+  <message name="GetPersonsResponse">
+    <part name="result" element="i0:Persons" />
+  </message>
+  <message name="GetProduct">
+    <part name="product" element="i0:ProductId" />
+  </message>
+  <message name="GetProductResponse">
+    <part name="response" element="i0:Product" />
+  </message>
+  <message name="GetProductsByCategory">
+    <part name="category" element="i0:Category" />
+  </message>
+  <message name="GetProductsByCategoryResponse">
+    <part name="response" element="i0:Products" />
+  </message>
+  <message name="GetProducts" />
+  <message name="GetProductsResponse">
+    <part name="response" element="i0:Products" />
+  </message>
+  <message name="GetOrderedBetween">
+    <part name="range" element="i0:DateRange" />
+  </message>
+  <message name="GetOrderedBetweenResponse">
+    <part name="response" element="i0:Orders" />
+  </message>
+  <message name="GetShippedBetween">
+    <part name="range" element="i0:DateRange" />
+  </message>
+  <message name="GetShippedBetweenResponse">
+    <part name="response" element="i0:Orders" />
+  </message>
+  <message name="GetOrderedBetweenBy">
+    <part name="rangeBy" element="i0:DateRangeBy" />
+  </message>
+  <message name="GetOrderedBetweenByResponse">
+    <part name="response" element="i0:Orders" />
+  </message>
+  <message name="GetShippedBetweenBy">
+    <part name="rangeBy" element="i0:DateRangeBy" />
+  </message>
+  <message name="GetShippedBetweenByResponse">
+    <part name="response" element="i0:Orders" />
+  </message>
+  <message name="UpdatePerson">
+    <part name="updatePerson" element="i0:UpdatePerson" />
+  </message>
+  <message name="UpdatePersonResponse">
+    <part name="result" element="i0:UpdatePersonResult" />
+  </message>
+  <message name="ChangePersons">
+    <part name="changeInfo" element="i0:ChangePersons" />
+  </message>
+  <message name="ChangePersonsResult">
+    <part name="result" element="i0:ChangePersonResults" />
+  </message>
+  <portType name="ShopInterfaceType">
+    <operation name="GetPerson">
+      <input message="i0:GetPerson" />
+      <output message="i0:GetPersonResponse" />
+    </operation>
+    <operation name="GetPersonByName">
+      <input message="i0:GetPersonByName" />
+      <output message="i0:GetPersonByNameResponse" />
+    </operation>
+    <operation name="GetPersons">
+      <input message="i0:GetPersons" />
+      <output message="i0:GetPersonsResponse" />
+    </operation>
+    <operation name="GetProduct">
+      <input message="i0:GetProduct" />
+      <output message="i0:GetProductResponse" />
+    </operation>
+    <operation name="GetProductsByCategory">
+      <input message="i0:GetProductsByCategory" />
+      <output message="i0:GetProductsByCategoryResponse" />
+    </operation>
+    <operation name="GetProducts">
+      <input message="i0:GetProducts" />
+      <output message="i0:GetProductsResponse" />
+    </operation>
+    <operation name="GetOrderedBetween">
+      <input message="i0:GetOrderedBetween" />
+      <output message="i0:GetOrderedBetweenResponse" />
+    </operation>
+    <operation name="GetShippedBetween">
+      <input message="i0:GetShippedBetween" />
+      <output message="i0:GetShippedBetweenResponse" />
+    </operation>
+    <operation name="GetOrderedBetweenBy">
+      <input message="i0:GetOrderedBetweenBy" />
+      <output message="i0:GetOrderedBetweenByResponse" />
+    </operation>
+    <operation name="GetShippedBetweenBy">
+      <input message="i0:GetShippedBetweenBy" />
+      <output message="i0:GetShippedBetweenByResponse" />
+    </operation>
+    <operation name="UpdatePerson">
+      <input message="i0:UpdatePerson" />
+      <output message="i0:UpdatePersonResponse" />
+    </operation>
+    <operation name="ChangePersons">
+      <input message="i0:ChangePersons" />
+      <output message="i0:ChangePersonsResult" />
+    </operation>
+  </portType>
+  <binding name="ShopInterface" type="i0:ShopInterfaceType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <operation name="GetPerson">
+      <soap:operation soapAction="GetPerson" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetPersonByName">
+      <soap:operation soapAction="GetPersonByName" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetPersons">
+      <soap:operation soapAction="GetPersons" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetProduct">
+      <soap:operation soapAction="GetProduct" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetProductsByCategory">
+      <soap:operation soapAction="GetProductsByCategory" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetProducts">
+      <soap:operation soapAction="GetProducts" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetOrderedBetween">
+      <soap:operation soapAction="GetOrderedBetween" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetShippedBetween">
+      <soap:operation soapAction="GetShippedBetween" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetOrderedBetweenBy">
+      <soap:operation soapAction="GetOrderedBetweenBy" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetShippedBetweenBy">
+      <soap:operation soapAction="GetShippedBetweenBy" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="UpdatePerson">
+      <soap:operation soapAction="UpdatePerson" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="ChangePersons">
+      <soap:operation soapAction="ChangePersons" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+</definitions>

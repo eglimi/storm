@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<codeSmith>
+<namespace>NorthWind</namespace>
+	<imports>
+		<import namespace="System" />
+		<import namespace="System.Collections" />
+		<import namespace="System.Reflection" />
+		<import namespace="System.Text" />
+		<import namespace="System.Data" />
+		<import namespace="System.Data.SqlClient" />
+		<import namespace="Storm.Lib" />
+		<import namespace="Storm.Attributes" />
+		<import namespace="NorthWind" />
+	</imports>
+	<propertySets>
+		<propertySet>
+			<property name="assemblyLoader">
+				<AssemblyLoader>
+					<SourceAssembly>D:\ooxgen\apps\NorthWind\bin\Debug\NorthWind.exe</SourceAssembly>
+					<ClassName>Region</ClassName>
+				</AssemblyLoader>
+			</property>
+		</propertySet>
+	</propertySets>
+	<template path="..\Templates\MapperGen.cst" />
+</codeSmith>

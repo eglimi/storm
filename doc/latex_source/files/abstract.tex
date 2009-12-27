@@ -1,0 +1,22 @@
+\begin{abstract}
+\setcounter{page}{6}
+\addcontentsline{toc}{chapter}{Abstract}
+	\textit{STORM} ist ein Framework das es ermöglicht, Code für das O/R Mapping
+	zu generieren. Das Framework besteht einerseits aus generischen Klassen, die
+	von den selbst geschriebenen Klassen benutzt werden können und andererseits
+	aus Templates, die benutzerdefinierte Klassen erzeugen. 
+	Die Kernidee von \textit{STORM} ist, dass der Entwickler abstrakte Klassen
+	schreibt, in denen er das Mapping zwischen Klassen der Applikation und
+	Tabellen der Datenbank angeben kann. Diese abstrakten Klassen können
+	anhand von Attributen, die in \textit{STORM} definiert wurden, parametriert werden.
+	Diese Attribute und deren Werte werden zur Zeit der Code Generierung gelesen
+	und dienen als Input der Templates. Der Output dieser Templates sind
+	die auf das Problem angepassten Domain Objekt und Mapper Implementationen.
+	
+	Der generierte Code übernimmt Aufgaben wie Lazy Load, Optimistic Offline Locking,
+	Verwaltung und Ausführung von Insert, Update und Delete sowie das dynamische Erstellen 
+	von Abfragen mittels eines Query Objects. Zudem stellt er eine Factory zur Verfügung, 
+	um Instanzen der generierten Klassen erstellen zu können.
+	
+	Um den Code zu generieren wurde das Open Source Tool CodeSmith eingesetzt.
+\end{abstract}

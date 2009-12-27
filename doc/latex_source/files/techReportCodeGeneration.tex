@@ -1,0 +1,57 @@
+\chapter{Code Generation}
+\label{cha:codeGeneration}
+
+	%----------
+	\section{Finding a Tool}
+		Mainly two projects exist which are able to generate code on basis of templates. These are
+		Workstate's Codify\footnote{\url{http://www.workstate.com/codify}} and 
+		CodeSmith\footnote{\url{http://www.ericjsmith.net/codesmith/}}. Both projects were evaluated
+		at the beginning of this thesis. CodeSmith has several advantages over Codify. First, it
+		is open source and it seems that it has a bigger community. Moreover, it cannot only be
+		integrated in Visual Studio .NET, it has a command line tool and it can be run 
+		from the CodeSmith standalone program. Particularly the command line tool is
+		useful for creating makefiles. Furthermore, CodeSmith has a much more powerful
+		way to write custom templates. Therefore, the decision clearly felt on CodeSmith. 
+		
+	%----------
+	\section{Procedure of Code Generation}
+		To be able to customise CodeSmith templates,
+		one needs parameters as input for them. Input parameters are in the case of \textit{STORM} the custom 
+		attributes in the abstract classes. The procedure to actually generate the code is as follows:\\[2mm]
+		
+			\noindent
+			\fbox{Parameterised, abstract classes}
+				$\xrightarrow{\text{compile}}$ 
+				\fbox{DLL}
+				$\xrightarrow{\text{input}}$
+				\fbox{Assembly Loader}\\[2mm]
+				$\xrightarrow[\text{a given class}]{\text{read type of}}$
+				\fbox{CodeSmith}
+				$\xrightarrow[\text{of class}]{\text{read attributes}}$
+				\fbox{Generated Code}\\[2mm]
+				
+		\noindent
+		First, all abstract classes must be compiled. The resulting DLL is used as input for
+		the \verb~AssemblyLoader~ which is part of \textit{STORM}. The \verb~AssemblyLoader~ loads 
+		the assembly and searches for a specified class. If the \verb~AssemblyLoader~
+		finds the specified class in the assembly, it returns the type definition for it to CodeSmith.
+		CodeSmith in turn takes this type definition and reads its custom attributes. On the basis of
+		these attributes, the template code is executed and the resulting code is generated.
+		
+	%----------
+	\section{Running the code}
+		When all concrete classes have been generated, the code can be executed. To execute the code,
+		the first step is to initialize the \verb~Registry~. This registry takes the runnable
+		code as argument and searches for generated classes in it. Every class which is found
+		is registered in a hashtable. Furthermore, the \verb~Registry~ operates as a
+		\textit{Factory Method}. The procedure looks as follows:\\[2mm]
+		
+			\noindent
+			\fbox{Executable}
+				$\xrightarrow{\text{run}}$ 
+				\fbox{Runnable code}
+				$\xrightarrow{\text{call init}}$
+				\fbox{Registry}\\[2mm]
+				$\xrightarrow[\text{and register them}]{\text{search generated classes}}$
+				\fbox{Execute operations}\\[2mm]
+				

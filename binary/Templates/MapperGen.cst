@@ -1,0 +1,973 @@
+<%@ CodeTemplate Language="C#" TargetLanguage="C#" %>
+<%@ Property Name="assemblyLoader" Type="Storm.Loader.AssemblyLoader" %>
+<%@ Assembly Name="Storm" %>
+<%@ Import Namespace="System.Reflection" %>
+<%@ Import Namespace="System.Collections" %>
+<%@ Import Namespace="System.Text" %>
+<%@ Import Namespace="Storm.Attributes" %>
+<%@ Import Namespace="Storm.Lib" %>
+
+<%
+try
+{ %>
+
+<%
+	initType();
+	processProperties();
+	processPrimaryKeys();
+%>
+
+	[MapperImpl(typeof(<%= m_type.Name %>))]
+	public class <%= m_type.Name %>Mapper : IMapper
+	{		
+#region Finder Methods
+		<%
+		{
+			string tableName = getTableName(); %>
+		public DomainObject findById(Key id)
+		{
+			try
+			{
+				SqlDataReader reader = null;
+				SqlConnection connection = UnitOfWork.Instance.Connection;
+
+				connection.Open();
+			<%
+			StringBuilder whereStmt = new StringBuilder();
+			String[] primKeyCriterias = new String[m_primaryKeys.Count];
+			for(int i = 0; i < m_primaryKeys.Count; i++)
+			{
+				primKeyCriterias[i] = getColumnName((PropertyInfo)m_primaryKeys[i]) + " = @" + ((PropertyInfo)m_primaryKeys[i]).Name;
+			}
+			whereStmt.Append(String.Join(" AND ", primKeyCriterias));
+			whereStmt.Append("\"");
+			%>
+
+				string sqlStmt = 
+					"SELECT * from <%= tableName %> WHERE <%= whereStmt.ToString() %>;
+				SqlCommand command = new SqlCommand(sqlStmt, connection);
+			<%
+			for(int i = 0; i < m_primaryKeys.Count; i++)
+				{%>
+				command.Parameters.Add("@<%= ((PropertyInfo)m_primaryKeys[i]).Name %>", id[<%= i %>]);
+				<%} %>
+
+				reader = command.ExecuteReader();
+				<%= m_type.Name %> <%= m_type.Name.ToLower() %> = null;
+				if(reader.Read())
+				{
+					<%= m_type.Name.ToLower() %> = loadFields(reader);
+				} 
+				if(reader != null)
+					reader.Close();
+				connection.Close();
+
+				return <%= m_type.Name.ToLower() %>;
+			}
+			catch(SqlException sqle)
+			{
+				throw new ApplicationException(sqle.Message);
+			}
+			catch(Exception e)
+			{
+				throw new ApplicationException(e.Message);
+			}
+		}		
+		<%} %>
+
+		public IList findAll()
+		{
+			try
+			{
+				ArrayList array = new ArrayList();
+				SqlDataReader reader = null;
+				SqlConnection connection = UnitOfWork.Instance.Connection;
+
+				connection.Open();
+
+				string sqlStmt = 
+					"SELECT * from <%= getTableName() %>";
+				SqlCommand command = new SqlCommand(sqlStmt, connection);
+
+				reader = command.ExecuteReader();
+				while(reader.Read())
+				{
+					array.Add(loadFields(reader));
+				} 
+				if(reader != null)
+					reader.Close();
+				connection.Close();
+
+				return array;
+			}
+			catch(SqlException sqle)
+			{
+				throw new ApplicationException(sqle.Message);
+			}
+			catch(Exception e)
+			{
+				throw new ApplicationException(e.Message);
+			}
+		}		
+
+		public IList find(QueryObject qo)
+		{
+			try
+			{
+				ArrayList array = new ArrayList();
+				SqlDataReader reader = null;
+				SqlConnection connection = UnitOfWork.Instance.Connection;
+
+				connection.Open();
+
+				string sqlStmt = 
+					"SELECT * from <%= getTableName() %> WHERE " + qo.ToString();
+				SqlCommand command = new SqlCommand(sqlStmt, connection);
+
+				reader = command.ExecuteReader();
+				while(reader.Read())
+				{
+					array.Add(loadFields(reader));
+				} 
+				if(reader != null)
+					reader.Close();
+				connection.Close();
+
+				return array;
+			}
+			catch(SqlException sqle)
+			{
+				throw new ApplicationException(sqle.Message);
+			}
+			catch(Exception e)
+			{
+				throw new ApplicationException(e.Message);
+			}
+		}		
+#endregion		
+		
+#region IMapper Members
+		public void insert(DomainObject subject, SqlConnection connection, SqlTransaction transaction)
+		{
+			try
+			{
+				<%= m_type.Name %> <%= m_type.Name.ToLower() %> = (<%= m_type.Name %>)subject;
+			<%
+			{
+				//Build INSERT and SELECT statements
+				StringBuilder insertStmt = new StringBuilder();
+				Hashtable columns = new Hashtable();
+				
+				insertStmt.Append("INSERT INTO ");
+				insertStmt.Append(getTableName());
+				insertStmt.Append(" (");
+				foreach(PropertyInfo propInfo in m_properties)
+				{
+					if(isColumn(propInfo) && (!m_primaryKeys.Contains(propInfo) || !isSurrogateKey()))
+					{
+						columns.Add(getColumnName(propInfo), propInfo.Name);
+					}
+				}
+				String[] colNames = new String[columns.Count];
+				String[] propNames = new String[columns.Count];
+				IDictionaryEnumerator enumerator = columns.GetEnumerator();
+				int enumeratorCounter = 0;
+				while(enumerator.MoveNext())
+				{
+					colNames[enumeratorCounter] = (String)enumerator.Key;
+					propNames[enumeratorCounter] = (String)enumerator.Value;
+					enumeratorCounter += 1;
+				}
+				insertStmt.Append(String.Join(", ", colNames));
+				insertStmt.Append(") VALUES (");
+				for(int i = 0; i < propNames.Length; i++)
+					propNames[i] = propNames[i].Insert(0, "@");
+				insertStmt.Append(String.Join(", ", propNames));
+				insertStmt.Append(")");
+				
+				insertStmt.Append(" ; SELECT ");
+				if(isSurrogateKey())
+				{
+					String[] surrKey = new String[2];
+					surrKey[0] = getColumnName((PropertyInfo)m_primaryKeys[0]);
+					surrKey[1] = getVersionField();
+					insertStmt.Append(String.Join(", ", surrKey));
+					insertStmt.Append(" FROM ");
+					insertStmt.Append(getTableName());
+					insertStmt.Append(" WHERE ");
+					insertStmt.Append(surrKey[0]);
+					insertStmt.Append(" = SCOPE_IDENTITY()");
+				} 
+				else
+				{
+					String[] primKeys = new String[m_primaryKeys.Count];
+					for(int i = 0; i < primKeys.Length; i++)
+						primKeys[i] = getColumnName((PropertyInfo)m_primaryKeys[i]) + "= @" + ((PropertyInfo)m_primaryKeys[i]).Name;
+					insertStmt.Append(getVersionField());
+					insertStmt.Append(" FROM ");
+					insertStmt.Append(getTableName());
+					insertStmt.Append(" WHERE ");
+					insertStmt.Append(String.Join(" AND ", primKeys));
+				}
+				%>
+				SqlCommand command = new SqlCommand(
+					"<%= insertStmt.ToString() %>",
+					connection, transaction);
+
+				<%
+				//declare command Parameters
+				enumerator.Reset();
+				while(enumerator.MoveNext())
+				{
+					foreach(PropertyInfo propInfo in m_properties)
+					{
+						if(propInfo.Name.Equals(enumerator.Value))
+						{
+							if(isToOne(propInfo))
+							{ 
+								foreach(Attribute propAttr in propInfo.GetCustomAttributes(true))
+								{
+									if(propAttr is Storm.Attributes.ToOneAttribute)
+									{ %>
+				if(subject.isNull("<%= enumerator.Value %>") || <%= m_type.Name.ToLower() %>.<%= enumerator.Value %>.isNull("<%= ((Storm.Attributes.ToOneAttribute)propAttr).RelationName %>"))
+				{
+					command.Parameters.Add("@<%= enumerator.Value %>", DBNull.Value );
+				}
+				else
+				{
+					command.Parameters.Add("@<%= enumerator.Value %>", <%= m_type.Name.ToLower() %>.<%= enumerator.Value %>.<%= ((Storm.Attributes.ToOneAttribute)propAttr).RelationName %>);
+				}
+									<%}
+								}
+							}
+							else
+							{ %>
+				if(subject.isNull("<%= enumerator.Value %>"))
+				{
+					command.Parameters.Add("@<%= enumerator.Value %>", DBNull.Value );
+				}
+				else
+				{
+					command.Parameters.Add("@<%= enumerator.Value %>", <%= m_type.Name.ToLower() %>.<%= enumerator.Value %>);
+				}
+							<%}
+						}
+					}
+				}
+				%>
+				SqlDataReader reader = command.ExecuteReader();
+				if(reader.Read())
+				{
+					<% if(isSurrogateKey())
+					{ %>
+					<%= m_type.Name.ToLower() %>.Id = new Key(new object[] {
+						safeGet<%= ((PropertyInfo)m_primaryKeys[0]).PropertyType.Name %>(reader, "<%= getColumnName((PropertyInfo)m_primaryKeys[0]) %>")});
+					<%
+					} %>
+					<%= m_type.Name.ToLower() %>.Timestamp = safeGetTimestamp(reader);
+					subject.FireIdChanged();
+					reader.Close();			
+				}
+				else
+				{
+					reader.Close();
+					throw new ConcurrencyException();
+				}
+				<%
+				}
+				%>		
+			}
+			catch(SqlException sqle)
+			{
+				throw new ApplicationException(sqle.Message);
+			}
+			catch(Exception e)
+			{
+				throw new ApplicationException(e.Message);
+			}
+		}
+		
+		public void update(DomainObject subject, SqlConnection connection, SqlTransaction transaction)
+		{
+			try
+			{
+				<%= m_type.Name %> <%= m_type.Name.ToLower() %> = (<%= m_type.Name %>)subject;
+			<%
+			{
+				StringBuilder updateStmt = new StringBuilder();
+				StringBuilder selectStmt = new StringBuilder();
+				Hashtable columns = new Hashtable();
+				
+				updateStmt.Append("\"UPDATE ");
+				updateStmt.Append(getTableName());
+				updateStmt.Append(" SET ");	
+				foreach(PropertyInfo col in m_properties)
+				{
+					if(isColumn(col) && (!m_primaryKeys.Contains(col)))
+						columns.Add(getColumnName(col), col.Name);
+				}
+				String[] colStrings = new String[columns.Count];
+				IDictionaryEnumerator enumerator = columns.GetEnumerator();
+				int enumeratorCounter = 0;
+				while(enumerator.MoveNext())
+				{
+					colStrings[enumeratorCounter] = enumerator.Key + " = @" + enumerator.Value;
+					enumeratorCounter += 1;
+				}
+				updateStmt.Append(String.Join(", ", colStrings));
+				updateStmt.Append(" WHERE ");
+				String[] primKeys = new String[m_primaryKeys.Count + 1];
+				for(int i = 0; i < m_primaryKeys.Count; i++)
+				{
+					primKeys[i] = getColumnName((PropertyInfo)m_primaryKeys[i]) + " = @" + ((PropertyInfo)m_primaryKeys[i]).Name;
+				}
+				primKeys[primKeys.Length - 1] = getVersionField() + " = @" + getVersionField();
+				updateStmt.Append(String.Join(" AND ", primKeys));
+				updateStmt.Append(" IF @@ROWCOUNT > 0");
+				
+				selectStmt.Append(" BEGIN SELECT ");
+				selectStmt.Append(getVersionField());
+				selectStmt.Append(" FROM ");
+				selectStmt.Append(getTableName());
+				selectStmt.Append(" WHERE ");
+				selectStmt.Append(String.Join(" AND ", primKeys, 0, primKeys.Length -1));
+				selectStmt.Append(" END\"");
+			%>
+				SqlCommand command = new SqlCommand(
+					<%= updateStmt.ToString() %> <%= selectStmt.ToString() %>,
+					connection, transaction); 
+
+				command.Parameters.Add("@<%= getVersionField() %>", <%= m_type.Name.ToLower() %>.Timestamp.Value);
+				<%
+				for(int i = 0; i < m_primaryKeys.Count; i++)
+				{
+					foreach(PropertyInfo propInfo in m_properties)
+					{
+						if(propInfo.Name.Equals(((PropertyInfo)m_primaryKeys[i]).Name))
+						{
+							if(isToOne(propInfo))
+							{ 
+								foreach(Attribute propAttr in propInfo.GetCustomAttributes(true))
+								{
+									if(propAttr is Storm.Attributes.ToOneAttribute)
+									{ %>
+				if(subject.isNull("<%= ((PropertyInfo)m_primaryKeys[i]).Name %>") || <%= m_type.Name.ToLower() %>.<%= ((PropertyInfo)m_primaryKeys[i]).Name %>.isNull("<%= ((Storm.Attributes.ToOneAttribute)propAttr).RelationName %>"))
+				{
+					command.Parameters.Add("@<%= ((PropertyInfo)m_primaryKeys[i]).Name %>", DBNull.Value );
+				}
+				else
+				{
+					command.Parameters.Add("@<%= ((PropertyInfo)m_primaryKeys[i]).Name %>", <%= m_type.Name.ToLower() %>.<%= ((PropertyInfo)m_primaryKeys[i]).Name %>.Id[0]);
+				}
+								<%	}
+								}
+							}
+							else
+							{ %>
+				if(subject.isNull("<%= ((PropertyInfo)m_primaryKeys[i]).Name %>"))
+				{
+					command.Parameters.Add("@<%= ((PropertyInfo)m_primaryKeys[i]).Name %>", DBNull.Value );
+				}
+				else
+				{
+					command.Parameters.Add("@<%= ((PropertyInfo)m_primaryKeys[i]).Name %>", <%= m_type.Name.ToLower() %>.<%= ((PropertyInfo)m_primaryKeys[i]).Name %>);
+				}
+							<%}
+						}
+					}
+				} 
+				enumerator.Reset();
+				
+				while(enumerator.MoveNext())
+				{
+					foreach(PropertyInfo propInfo in m_properties)
+					{
+						if(propInfo.Name.Equals(enumerator.Value))
+						{
+							if(isToOne(propInfo))
+							{ 
+								foreach(Attribute propAttr in propInfo.GetCustomAttributes(true))
+								{
+									if(propAttr is Storm.Attributes.ToOneAttribute)
+									{ %>
+				if(subject.isNull("<%= enumerator.Value %>") || <%= m_type.Name.ToLower() %>.<%= enumerator.Value %>.isNull("<%= ((Storm.Attributes.ToOneAttribute)propAttr).RelationName %>"))
+				{
+					command.Parameters.Add("@<%= enumerator.Value %>", DBNull.Value );
+				}
+				else
+				{
+					command.Parameters.Add("@<%= enumerator.Value %>", <%= m_type.Name.ToLower() %>.<%= enumerator.Value %>.Id[0]);
+				}
+									<%}
+								}
+							}
+							else
+							{ %>
+				if(subject.isNull("<%= enumerator.Value %>"))
+				{
+					command.Parameters.Add("@<%= enumerator.Value %>", DBNull.Value );
+				}
+				else
+				{
+					command.Parameters.Add("@<%= enumerator.Value %>", <%= m_type.Name.ToLower() %>.<%= enumerator.Value %>);
+				}
+							<%}
+						}
+					}
+				} %>
+
+				SqlDataReader reader = command.ExecuteReader();
+				if(reader.Read())
+				{
+					<%= m_type.Name.ToLower() %>.Timestamp = safeGetTimestamp(reader);
+					reader.Close();
+				}
+				else
+				{
+					reader.Close();
+					throw new ConcurrencyException();
+				}
+				subject.FireIdChanged();
+
+			<%} %>			
+			}
+			catch(SqlException sqle)
+			{
+				throw new ApplicationException(sqle.Message);
+			}
+			catch(Exception e)
+			{
+				throw new ApplicationException(e.Message);
+			}
+		}
+		
+		public void delete(DomainObject subject, SqlConnection connection, SqlTransaction transaction)
+		{
+			try
+			{
+				<%= m_type.Name %> <%= m_type.Name.ToLower() %> = (<%= m_type.Name %>)subject;
+			<%
+			{
+				StringBuilder deleteStmt = new StringBuilder();
+				
+				deleteStmt.Append("\"DELETE FROM ");
+				deleteStmt.Append(getTableName());
+				deleteStmt.Append(" WHERE ");
+				String[] primKeys = new String[m_primaryKeys.Count + 1];
+				for(int i = 0; i < m_primaryKeys.Count; i++)
+				{
+					primKeys[i] = getColumnName((PropertyInfo)m_primaryKeys[i]) + " = @" + ((PropertyInfo)m_primaryKeys[i]).Name;
+				}
+				primKeys[primKeys.Length - 1] = getVersionField() + " = @" + getVersionField();
+				deleteStmt.Append(String.Join(" AND ", primKeys));
+				deleteStmt.Append("\"");
+			%>
+				
+				SqlCommand command = new SqlCommand(
+					<%= deleteStmt.ToString() %>,
+					connection, transaction);
+
+				command.Parameters.Add("@<%= getVersionField() %>", <%= m_type.Name.ToLower() %>.Timestamp.Value);
+				<%
+				for(int i = 0; i < m_primaryKeys.Count; i++)
+				{
+					foreach(PropertyInfo propInfo in m_properties)
+					{
+						if(propInfo.Name.Equals(((PropertyInfo)m_primaryKeys[i]).Name))
+						{
+							if(isToOne(propInfo))
+							{ 
+								foreach(Attribute propAttr in propInfo.GetCustomAttributes(true))
+								{
+									if(propAttr is Storm.Attributes.ToOneAttribute)
+									{ %>
+				if(subject.isNull("<%= ((PropertyInfo)m_primaryKeys[i]).Name %>") || <%= m_type.Name.ToLower() %>.<%= ((PropertyInfo)m_primaryKeys[i]).Name %>.isNull("<%= ((Storm.Attributes.ToOneAttribute)propAttr).RelationName %>"))
+				{
+					command.Parameters.Add("@<%= ((PropertyInfo)m_primaryKeys[i]).Name %>", DBNull.Value );
+				}
+				else
+				{
+					command.Parameters.Add("@<%= ((PropertyInfo)m_primaryKeys[i]).Name %>", <%= m_type.Name.ToLower() %>.<%= ((PropertyInfo)m_primaryKeys[i]).Name %>.Id[0]);
+				}
+								<%	}
+								}
+							}
+							else
+							{ %>
+				if(subject.isNull("<%= ((PropertyInfo)m_primaryKeys[i]).Name %>"))
+				{
+					command.Parameters.Add("@<%= ((PropertyInfo)m_primaryKeys[i]).Name %>", DBNull.Value );
+				}
+				else
+				{
+					command.Parameters.Add("@<%= ((PropertyInfo)m_primaryKeys[i]).Name %>", <%= m_type.Name.ToLower() %>.<%= ((PropertyInfo)m_primaryKeys[i]).Name %>);
+				}
+							<%}
+						}
+					}
+				} %>
+				if(command.ExecuteNonQuery() <= 0)
+				{
+					throw new ConcurrencyException();
+				}
+			<%} %>
+			}
+			catch(SqlException sqle)
+			{
+				throw new ApplicationException(sqle.Message);
+			}
+			catch(Exception e)
+			{
+				throw new ApplicationException(e.Message);
+			}
+		}
+		
+		public DomainObject ResolveToOneRelation(Key id, String fieldName)
+		{
+			SqlDataReader reader = null;
+			SqlConnection connection = UnitOfWork.Instance.Connection;
+			
+			connection.Open();
+
+			try
+			{
+				String selectStmt = "SELECT * FROM <%= getTableName() %> WHERE " + fieldName + " = @FK";
+				SqlCommand command = new SqlCommand(selectStmt, connection);
+				command.Parameters.Add("@FK", id[0]);
+				
+				reader = command.ExecuteReader();
+				<%= m_type.Name %> <%= m_type.Name.ToLower() %> = null;
+				
+				if(reader.Read())
+				{
+					<%= m_type.Name.ToLower() %> = loadFields(reader);
+				}
+				if(reader != null)
+				{
+					reader.Close();
+				}
+				connection.Close();
+				
+				return <%= m_type.Name.ToLower() %>;
+			}
+			catch(SqlException sqle)
+			{
+				throw new ApplicationException(sqle.Message);
+			}
+			catch(Exception e)
+			{
+				throw new ApplicationException(e.Message);
+			}
+			finally
+			{
+				connection.Close();
+			}
+		}
+		
+		public IList ResolveToManyRelation(Key id, String fieldName)
+		{
+			SqlDataReader reader = null;
+			ArrayList array = new ArrayList();
+			SqlConnection connection = UnitOfWork.Instance.Connection;
+			SqlCommand command;
+			connection.Open();
+			
+			try
+			{
+				<%
+				{
+				StringBuilder selectIdStmt = new StringBuilder();
+				
+				selectIdStmt.Append("\"SELECT ");
+				String[] primKeysWithTst = new String[m_primaryKeys.Count + 1];
+				for(int i = 0; i < m_primaryKeys.Count; i++)
+				{
+					primKeysWithTst[i] = getColumnName((PropertyInfo)m_primaryKeys[i]);
+				}
+				primKeysWithTst[primKeysWithTst.Length - 1] = getVersionField();
+				selectIdStmt.Append(String.Join(", ", primKeysWithTst));
+				selectIdStmt.Append(" FROM ");
+				selectIdStmt.Append(getTableName());
+				selectIdStmt.Append(" WHERE \" + fieldName + \" = @FK\"");
+				%>
+				command = new SqlCommand(
+					<%= selectIdStmt.ToString() %>, connection);
+					
+				command.Parameters.Add("@FK", id[0]);
+				
+				reader = command.ExecuteReader();
+				ArrayList keys = new ArrayList();
+				Timestamp timestamp;
+				while(reader.Read())
+				{ 
+				<%
+				ArrayList currentKeyArgs = new ArrayList();
+				foreach(PropertyInfo primKey in m_primaryKeys)
+				{ %>
+					object <%= primKey.Name.ToLower() %> = safeGetValue(reader, "<%= getColumnName(primKey) %>");
+					<% currentKeyArgs.Add(primKey.Name.ToLower());
+				} %>
+					
+					timestamp = safeGetTimestamp(reader);
+					
+					Key currentKey = new Key(new object[]{<%= String.Join(", ", (String[])currentKeyArgs.ToArray(typeof(String))) %>});
+					DomainObject domobj = UnitOfWork.Instance.IdentityMap.getDomainObjectIfLoaded(
+						typeof(<%= m_type.Name %>), currentKey);
+					
+					if(domobj == null)
+					{
+						keys.Add(currentKey);
+					}
+					else if(!domobj.Timestamp.Equals(timestamp))
+					{
+						UnitOfWork.Instance.IdentityMap.unregisterDomainObject(domobj);
+						keys.Add(currentKey);
+					}
+					else
+					{
+						array.Add(domobj);
+					}
+				}
+				reader.Close();
+
+				if(keys.Count > 0)
+				{
+					int primKeysCount = <%= m_primaryKeys.Count %>;
+					ArrayList primKeys = new ArrayList();
+					<%
+				foreach(PropertyInfo propInfo in m_primaryKeys)
+				{ %>
+					primKeys.Add("<%= getColumnName(propInfo) %>");
+				<%} %>
+					StringBuilder selectAdStmt = new StringBuilder();
+					selectAdStmt.Append("SELECT * FROM ");
+					selectAdStmt.Append("<%= getTableName() %>");
+					selectAdStmt.Append(" WHERE ");
+					StringBuilder whereStmt;
+					String[] andStmts = new String[keys.Count];
+					for(int i = 0; i < keys.Count; i++)
+					{
+						String[] primKeyCriterias = new String[primKeysCount];
+						for(int j = 0; j < primKeysCount; j++)
+						{
+							primKeyCriterias[j] = primKeys[j] + " = @key" + i +j;
+						}
+						whereStmt = new StringBuilder();
+						whereStmt.Append("(");
+						whereStmt.Append(String.Join(" AND ", primKeyCriterias));
+						whereStmt.Append(")");
+						andStmts[i] = whereStmt.ToString();
+					}
+					selectAdStmt.Append(String.Join(" OR ", andStmts));
+					
+					command = new SqlCommand(
+						selectAdStmt.ToString(), connection);
+					for(int i = 0; i < keys.Count; i++)
+					{
+						for(int j = 0; j < primKeysCount; j++)
+						{
+							String keyParam = "@key" + i + j;
+							command.Parameters.Add(keyParam, ((Key)keys[i])[j]);
+						}
+					}
+					
+					reader = command.ExecuteReader();
+					
+					while(reader.Read())
+					{
+						<%= m_type.Name %> <%= m_type.Name.ToLower() %> = loadFields(reader);
+						array.Add(<%= m_type.Name.ToLower() %>);
+					}
+					reader.Close();
+				} 
+			}
+				<%} %>
+			catch(SqlException sqle)
+			{
+				throw new ApplicationException(sqle.Message);
+			}
+			catch(Exception e)
+			{
+				throw new ApplicationException(e.Message);
+			}
+			finally
+			{
+				connection.Close();
+			}
+			return array;
+		}
+#endregion		
+
+#region Helper Methods
+		public <%= m_type.Name %> loadFields(SqlDataReader reader)
+		{
+			Timestamp m_timestamp = safeGetTimestamp(reader);
+			Key m_key = new Key(new object[]{
+		<%
+		{
+		StringBuilder keyParams = new StringBuilder();
+		bool notFirst = false;
+		foreach(PropertyInfo pk in m_primaryKeys)
+		{ 
+			if(notFirst)
+				keyParams.Append(",\n\t\t\t\t");
+			keyParams.Append("safeGetValue");
+			//keyParams.Append(pk.PropertyType.Name);
+			keyParams.Append("(reader, \"");
+			keyParams.Append(getColumnName(pk));
+			keyParams.Append("\")");	
+			notFirst = true;
+		} %>
+				<%= keyParams.ToString() %>
+			});
+		<%} %>
+
+		<%
+		foreach(PropertyInfo propInfo in m_properties)
+		{
+			if(isColumn(propInfo) && (!isSurrogateKey() || !m_primaryKeys.Contains(propInfo) ) && (!isToMany(propInfo)) && (!isToOne(propInfo))){ %>
+			object m_<%= propInfo.Name %> = safeGet<%= propInfo.PropertyType.Name %>(reader, "<%= getColumnName(propInfo) %>");
+			<%}
+		} %>
+		
+			<%= m_type.Name %> <%= m_type.Name.ToLower() %> = 
+				(<%= m_type.Name %>)UnitOfWork.Instance.IdentityMap.getDomainObjectIfLoaded(typeof(<%= m_type.Name %>), m_key);
+			
+			if(<%= m_type.Name.ToLower() %> == null)
+			{
+				<%= m_type.Name.ToLower() %> = 
+					(<%= m_type.Name %>)Registry.Instance.getFactory(typeof(<%= m_type.Name %>)).createFromParameters(
+						m_key,
+						m_timestamp,
+					<%
+					{
+					bool notFirst = false;
+					StringBuilder paramString = new StringBuilder();
+					foreach(PropertyInfo propInfo in m_properties)
+					{
+						if((isColumn(propInfo) && (!m_primaryKeys.Contains(propInfo) || !isSurrogateKey())) || isToMany(propInfo))
+						{
+							if(notFirst)
+								paramString.Append(",\n\t\t\t\t\t\t");
+							
+							Type relation = null;
+							String fieldName = String.Empty;
+							if(isToOne(propInfo))
+							{
+								foreach(Attribute toOneAttr in propInfo.GetCustomAttributes(true))
+								{
+									if(toOneAttr is Storm.Attributes.ToOneAttribute)
+									{
+										relation = ((Storm.Attributes.ToOneAttribute)toOneAttr).RelationTo;
+										PropertyInfo targetProp = relation.GetProperty(((Storm.Attributes.ToOneAttribute)toOneAttr).RelationName);
+										foreach(Attribute targetAttr in targetProp.GetCustomAttributes(true))
+										{
+											if(targetAttr is Storm.Attributes.ColumnAttribute)
+												fieldName = ((Storm.Attributes.ColumnAttribute)targetAttr).DbColumn;
+										}
+									}
+								}
+								paramString.Append("new DictionaryEntry(\"");
+								paramString.Append(propInfo.Name + "\", ");
+								paramString.Append("new ToOneRelation(" + "typeof(" + relation.Name + "), \"" + fieldName + "\", ");
+								paramString.Append("new Key(new object[] { ");
+								paramString.Append("safeGetValue" + "(reader, \"" + getColumnName(propInfo) + "\")");
+								paramString.Append("})))");
+							}
+							else if(isToMany(propInfo))
+							{
+								foreach(Attribute toManyAttr in propInfo.GetCustomAttributes(true))
+								{
+									if(toManyAttr is Storm.Attributes.ToManyAttribute)
+									{
+										relation = ((Storm.Attributes.ToManyAttribute)toManyAttr).RelationTo;
+										PropertyInfo targetProp = relation.GetProperty(((Storm.Attributes.ToManyAttribute)toManyAttr).RelationName);
+										foreach(Attribute targetAttr in targetProp.GetCustomAttributes(true))
+										{
+											if(targetAttr is Storm.Attributes.ColumnAttribute)
+												fieldName = ((Storm.Attributes.ColumnAttribute)targetAttr).DbColumn;
+										}
+									}
+								}
+								paramString.Append("new DictionaryEntry(\"");
+								paramString.Append(propInfo.Name + "\", ");
+								paramString.Append("new ToManyRelation(" + "typeof(" + relation.Name + "), \"" + fieldName + "\", ");
+								paramString.Append("m_key");
+								paramString.Append(", false))");
+							}
+							else
+							{
+								paramString.Append("new DictionaryEntry(\"");
+								paramString.Append(propInfo.Name);
+								paramString.Append("\", m_");
+								paramString.Append(propInfo.Name);
+								paramString.Append(")");
+							}
+							notFirst = true;
+						}
+					} %> 
+						<%= paramString.ToString() %>);
+					<%} %>
+				
+				UnitOfWork.Instance.IdentityMap.registerDomainObject(<%= m_type.Name.ToLower() %>);
+			}
+			return <%= m_type.Name.ToLower() %>;
+		}
+
+		protected Timestamp safeGetTimestamp(SqlDataReader reader)
+		{
+			byte[] m_buffer = new byte[8];
+			reader.GetBytes(reader.GetOrdinal("<%= getVersionField() %>"), 0, m_buffer, 0, 8);
+			return new Timestamp(m_buffer);
+		}
+		
+		protected object safeGetString(SqlDataReader reader, string columnName)
+		{
+			int ordinal = reader.GetOrdinal(columnName);
+			return reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal).Trim();
+		}
+		
+		protected object safeGetDouble(SqlDataReader reader, string columnName)
+		{
+			int ordinal = reader.GetOrdinal(columnName);
+			return reader.IsDBNull(ordinal) ? null : (object)reader.GetDouble(ordinal);
+		}
+		
+		protected object safeGetInt32(SqlDataReader reader, string columnName)
+		{
+			int ordinal = reader.GetOrdinal(columnName);
+			return reader.IsDBNull(ordinal) ? null : (object)reader.GetInt32(ordinal);
+		}
+		
+		protected object safeGetDateTime(SqlDataReader reader, string columnName)
+		{
+			int ordinal = reader.GetOrdinal(columnName);
+			return reader.IsDBNull(ordinal) ? null : (object)reader.GetDateTime(ordinal);
+		}
+
+		protected object safeGetValue(SqlDataReader reader, string columnName)
+		{
+			int ordinal = reader.GetOrdinal(columnName);
+			return reader.IsDBNull(ordinal) ? null : (object)reader.GetValue(ordinal);
+		}
+#endregion
+
+	}
+<% }
+catch(Exception e)
+{
+	throw new ApplicationException(e.Message);
+} %>
+<script runat="template">
+	private Type m_type = null;
+	private ArrayList m_properties = null;
+	private ArrayList m_primaryKeys = null;
+	private Type m_factory = null;
+	
+	void initType()
+	{
+		m_type = assemblyLoader.ClassType;
+	}
+	
+	string getColumnName(PropertyInfo propInfo)
+	{
+		String columnName = String.Empty;
+		foreach(Attribute propAttr in propInfo.GetCustomAttributes(true))
+		{
+			if(propAttr is Storm.Attributes.ColumnAttribute)
+				columnName = ((Storm.Attributes.ColumnAttribute)propAttr).DbColumn;
+		}
+		return columnName;
+	}
+	
+	string getTableName()
+	{
+		String tableName = String.Empty;
+		foreach(Attribute attr in m_type.GetCustomAttributes(false))
+			if(attr is Storm.Attributes.TableAttribute)
+				tableName = ((Storm.Attributes.TableAttribute)attr).TableName;
+		return tableName;
+	}
+	
+	string getVersionField()
+	{
+		String versionField = String.Empty;
+		foreach(Attribute attr in m_type.GetCustomAttributes(false))
+			if(attr is Storm.Attributes.VersionFieldAttribute)
+				versionField = ((Storm.Attributes.VersionFieldAttribute)attr).FieldName;
+		return versionField;		
+	}
+	
+	bool isToMany(PropertyInfo pInfo)
+	{
+		foreach(Attribute attr in pInfo.GetCustomAttributes(true))
+		{
+			if(attr is Storm.Attributes.ToManyAttribute)
+				return true;
+		}
+		return false;
+	}
+
+	bool isToOne(PropertyInfo pInfo)
+	{
+		foreach(Attribute attr in pInfo.GetCustomAttributes(true))
+		{
+			if(attr is Storm.Attributes.ToOneAttribute)
+				return true;
+		}
+		return false;
+	}
+	
+	bool isColumn(PropertyInfo pInfo)
+	{
+		foreach(Attribute attr in pInfo.GetCustomAttributes(true))
+		{
+			if(attr is Storm.Attributes.ColumnAttribute)
+				return true;
+		}
+		return false;
+	}
+		
+	bool isPrimaryKey(PropertyInfo pInfo)
+	{
+		foreach(Attribute attr in pInfo.GetCustomAttributes(true))
+		{
+			if(attr is Storm.Attributes.PrimaryKeyAttribute)
+				return true;
+		}
+		return false;
+	}
+	
+	bool isSurrogateKey()
+	{
+		foreach(Attribute attr in m_type.GetCustomAttributes(false))
+			if(attr is Storm.Attributes.TableAttribute)
+				return ((Storm.Attributes.TableAttribute)attr).KeyIsSurrogate ? true : false;
+		return false;
+	}
+	
+	void processProperties()
+	{
+		if(m_properties == null)
+			m_properties = new ArrayList();
+		foreach(PropertyInfo pInfo in m_type.GetProperties(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance))
+		{
+			m_properties.Add(pInfo);
+		}
+	}
+	
+	void processPrimaryKeys()
+	{
+		if(m_primaryKeys == null)
+			m_primaryKeys = new ArrayList();
+		foreach(PropertyInfo pInfo in m_type.GetProperties(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance))
+		{
+			foreach(Attribute propAttr in pInfo.GetCustomAttributes(true))
+			{
+				if(propAttr is Storm.Attributes.PrimaryKeyAttribute)
+					m_primaryKeys.Add(pInfo);
+			}
+		}
+	}
+
+</script>

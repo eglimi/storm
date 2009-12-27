@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema id="BusinessObjects1" targetNamespace="http://tempuri.org/BusinessObjects1.xsd"
+	elementFormDefault="qualified" xmlns="http://tempuri.org/BusinessObjects1.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:group name="classes">
+		<xs:sequence>
+			<xs:element name="Person" type="PersonType" />
+			<xs:element name="Address" type="AddressType" />
+		</xs:sequence>
+	</xs:group>
+	<xs:complexType name="AddressType">
+		<xs:sequence>
+			<xs:element name="Person" type="PersonType" />
+			<xs:element name="Street">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="City">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="PostalCode">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Email">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Phone">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PersonType">
+		<xs:sequence>
+			<xs:element name="Name">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:length value="12" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Password">
+				<xs:simpleType>
+					<xs:restriction base="xs:string"></xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Roles" minOccurs="0" maxOccurs="unbounded">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="BrowseUsers" />
+						<xs:enumeration value="BrowseProducts" />
+						<xs:enumeration value="BrowseProductsExt" />
+						<xs:enumeration value="BrowseOrders" />
+						<xs:enumeration value="BrowseOwnOrders" />
+						<xs:enumeration value="MakeOrders" />
+						<xs:enumeration value="ChangeProductData" />
+						<xs:enumeration value="ChangeOrders" />
+						<xs:enumeration value="ChangeUsers" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Adressen" type="AddressType" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

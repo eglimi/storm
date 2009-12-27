@@ -1,0 +1,81 @@
+\chapter{Overview}
+
+	\section{About this document}
+		This document has been written during a diploma thesis. It is the main
+		part of the whole documentation and describes the core of this work. It gives
+		a project overview and discusses all technical aspects.
+
+	\section{Introduction}
+		During 2003, three different versions of an order application were developed.
+		This applications represent different approaches to deal with 
+		databases. The application itself is not very complicated. It manages
+		persons including addresses who can make orders. The respective database and
+		application designs are discussed later in this document.
+		
+		The purpose of this work originated from the third of those applications. That version
+		manages database related tasks through an O/R Mapper. Implementing such a mapper
+		can be very challenging and error-prone. This is where \textit{STORM} comes into play.
+		The idea behind it is to have a framework which generates all mapping code automatically,
+		based on input parameters. This document describes how this can be achieved and also
+		explains the limitation of such an approach. As a reference implementation to prove
+		the usability of \textit{STORM}, a fourth order application has been created.
+		Throughout this document, all implementation examples are taken from this reference
+		implementation. At chapter \ref{cha:createApplication} the reference application 
+		is taken as a real world example to show how to develop an application with \textit{STORM}.
+		
+		
+	\section{About O/R Mapping}
+		Today, most new applications are developed by using an object oriented programming
+		language like C++ or C\#. Nevertheless, most databases have a relational structure.
+		Relational means that relations between objects are always be modelled by defining foreign
+		keys in tables. This structural difference is known as ``type mismatch''. Because of that, a mechanism
+		is needed that provides a way to work with databases in an easy as possible way. One
+		possibility is to use datasets. Datasets have a similar structure to that of a relational 
+		database and are built-in types in C\#.
+		This method was implemented in the first version of the order application.
+		Another possibility is to write code which manages all the mapping. Namely this means
+		mapping classes to tables, variables to columns, etc. This has the advantage that
+		a programmer can code in a pure object oriented manner an does need to pay less
+		attention to the database. For him, database tasks are done automatically. Although most
+		O/R mapper, including \textit{STORM}, have more features implemented, mapping the in-memory
+		structure to the database structure is the most important task of an O/R mapper.
+	
+	%---------
+	\section{How to start}
+		At the end, an O/R mapper is nothing else than code that is responsible for
+		certain tasks. There are several methods to create this code. A catchphrase in 
+		the context of software engineering is ``generic programming''. Generic programming is 
+		a technique aiming at writing programs as general as possible, 
+		without sacrificing efficiency by doing overgeneralising. Another technique is called
+		``generative programming''. Generative programming enables programs to be automatically
+		constructed. There are more programming techniques like aspect-oriented or functional
+		programming which are not taken into account here.
+		
+		Both, generic and generative programming have their strengths and weaknesses.
+		The third order application made use of the generic programming technique. As
+		a counterpart, this thesis should result in the knowledge of the usability
+		of a generative programming technique for this specific problem.
+		
+		As stated before, a generative programming technique enables programs to be automatically
+		constructed. This sounds promising, but before one can start writing a program
+		which constructs another program, he needs to define a starting point. Transferred
+		to the problem of O/R mapping, this means that one needs to define where to make
+		the mapping definitions. Three scenarios would be sensible:
+		\begin{itemize}
+			\item The database design is the starting point. Out of this design, all domain objects
+						and the mapping code are generated.
+			\item The domain model is the starting point. Out of this, the database tables and the mapping
+						code are generated.
+			\item Both, the domain model and the database design are taken as starting point. Additionally, the mapping 
+						needs to be defined. Out of this, the mapping code is generated.
+		\end{itemize} 
+		
+		Which approach should be chosen depends on the requirements for a given project. Each
+		has been realised in commercial and open source projects. In this thesis,
+		we have chosen to use the second approach where the domain model should be taken as starting point.
+		Although with this approach the database tables could be generated automatically, it is not
+		implemented because we use the existing database from the previous order applications. This is
+		not a problem, because the mapping can be specified in the domain objects and this works
+		whether the database tables are generated or already exist. 
+				
+	

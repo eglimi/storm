@@ -1,0 +1,736 @@
+<%@ CodeTemplate Language="C#" TargetLanguage="C#" %>
+<%@ Property Name="assemblyLoader" Type="Storm.Loader.AssemblyLoader" %>
+<%@ Assembly Name="Storm" %>
+<%@ Import Namespace="System.Reflection" %>
+<%@ Import Namespace="System.Collections" %>
+<%@ Import Namespace="System.Text" %>
+<%@ Import Namespace="Storm.Attributes" %>
+<%@ Import Namespace="Storm.Lib" %>
+
+
+<%
+	initType();
+	processProperties();
+	processPrimaryKeys();
+%>
+
+	[DomainObjectImpl]
+	public class <%= m_type.Name %>Impl : <%= m_type.Name %>
+	{
+#region Factory Implementation
+		<%if(Factory != null){ %>
+		public class FactoryImpl : <%= m_factory.Name %>, IFactory
+		{ <%
+			foreach(MethodInfo mInfo in Factory.GetMethods(BindingFlags.DeclaredOnly|BindingFlags.Instance|BindingFlags.Public))
+			{
+				StringBuilder paramFullString = new StringBuilder();
+				StringBuilder paramString = new StringBuilder();
+				bool notFirst = false;
+				foreach(ParameterInfo pInfo in mInfo.GetParameters())
+				{
+					if(notFirst)
+					{
+						paramFullString.Append(", ");
+						paramString.Append(", ");
+					}
+					paramFullString.Append(pInfo.ParameterType.Name);
+					paramFullString.Append(" ");
+					paramFullString.Append(pInfo.Name);
+					paramString.Append(pInfo.Name);
+					notFirst = true;
+				}%>
+			public override <%= m_type.Name %> <%= mInfo.Name %>(<%= paramFullString.ToString() %>)
+			{
+				return new <%= m_type.Name %>Impl(<%= paramString.ToString() %>);
+			}
+			<%}
+		} 
+		else
+		{ %>
+			public class FactoryImpl : IFactory
+			{
+		<%} %>
+			
+			public DomainObject create()
+			{
+				return new <%= m_type.Name %>Impl();
+			}
+			
+			public DomainObject createFromParameters(
+				Key id,
+				Timestamp timestamp,
+				params DictionaryEntry[] parameters)
+			{
+				return new <%= m_type.Name %>Impl(id, timestamp, parameters);
+			}
+		}
+#endregion
+
+#region Finder Implementation
+		<%if(Finder != null){ %>
+		public class FinderImpl : <%= m_finder.Name %>, IFinder
+		{
+		<%
+		foreach(MethodInfo mInfo in Finder.GetMethods(BindingFlags.DeclaredOnly|BindingFlags.Instance|BindingFlags.Public))
+		{
+			if(mInfo.IsAbstract) {
+				StringBuilder paramFullString = new StringBuilder();
+				StringBuilder paramString = new StringBuilder();
+				Hashtable paramEntries = new Hashtable();
+				bool notFirst = false;
+				foreach(ParameterInfo pInfo in mInfo.GetParameters())
+				{
+					if(notFirst)
+					{
+						paramFullString.Append(", ");
+						paramString.Append(", ");
+					}
+					paramFullString.Append(pInfo.ParameterType.Name);
+					paramFullString.Append(" ");
+					paramFullString.Append(pInfo.Name);
+					paramString.Append(pInfo.Name);
+					foreach(Attribute paramAttr in pInfo.GetCustomAttributes(true))
+					{
+						if(paramAttr is Storm.Attributes.ParameterDefAttribute)
+						{
+							PropertyInfo colPInfo = m_type.GetProperty(((Storm.Attributes.ParameterDefAttribute)paramAttr).PropertyName);
+							paramEntries.Add(getColumnName(colPInfo), pInfo.Name);
+						}
+					} 
+					notFirst = true;
+				}%>
+			public override IList <%= mInfo.Name %>(<%= paramFullString.ToString() %>)
+			{
+				QueryObject qo = new QueryObject();
+				<%
+				foreach(String crit in paramEntries.Keys)
+				{ %>
+				qo.addCriteria(new Criteria(Criteria.Operator.Equal, "<%= crit %>", <%= paramEntries[crit] %>));
+				<% } %>
+
+				return Registry.Instance.getMapper(typeof(<%= m_type.Name %>)).find(qo);
+			}
+			<%}
+		} 
+		} else
+		{ %>
+		public class FinderImpl : IFinder
+		{
+		<%} %>
+			public DomainObject findById(Key id)
+			{
+				return Registry.Instance.getMapper(typeof(<%= m_type.Name %>)).findById(id);
+			}
+			public IList find(QueryObject qo)
+			{
+				return Registry.Instance.getMapper(typeof(<%= m_type.Name %>)).find(qo);
+			}
+			public IList findAll()
+			{
+				return Registry.Instance.getMapper(typeof(<%= m_type.Name %>)).findAll();
+			}
+		}
+#endregion
+
+#region Static Attributes
+		private static FactoryImpl m_FactoryImpl = new FactoryImpl();
+		private static FinderImpl m_FinderImpl = new FinderImpl();
+#endregion
+		
+#region Member Variables
+		<%
+		//Process all Properties and declare the appropriate member variables.
+		//First, all To many relations are resolved then all the rest...
+		foreach(PropertyInfo pInfo in m_properties)
+		{
+			if(!m_primaryKeys.Contains(pInfo.Name) || !isSurrogateKey())
+			{
+				if(isToMany(pInfo)){ %>
+		private ToManyRelation m_<%= pInfo.Name %> = null;
+				<%}
+				if(isToOne(pInfo)){ %>
+		private ToOneRelation m_<%= pInfo.Name %> = null;
+				<%}
+				else if(isColumn(pInfo) && (!isToOne(pInfo))){ %>
+		private object m_<%= pInfo.Name %> = null;
+				<%}
+			}
+		} %>		
+#endregion
+
+#region Constructors
+		public <%= m_type.Name %>Impl()
+		{
+			markNew();
+			<%
+			{
+			foreach(PropertyInfo propInfo in m_properties)
+			{
+				if(isToOne(propInfo))
+				{
+					//if(notFirst)
+					//	paramString.Append(",\n\t\t\t\t\t\t");
+
+					Type relation = null;
+					String fieldName = String.Empty;
+					if(isToOne(propInfo))
+					{
+						foreach(Attribute toOneAttr in propInfo.GetCustomAttributes(true))
+						{
+							if(toOneAttr is Storm.Attributes.ToOneAttribute)
+							{
+								relation = ((Storm.Attributes.ToOneAttribute)toOneAttr).RelationTo;
+								PropertyInfo targetProp = relation.GetProperty(((Storm.Attributes.ToOneAttribute)toOneAttr).RelationName);
+								foreach(Attribute targetAttr in targetProp.GetCustomAttributes(true))
+								{
+									if(targetAttr is Storm.Attributes.ColumnAttribute)
+										fieldName = ((Storm.Attributes.ColumnAttribute)targetAttr).DbColumn;
+								}
+							}
+						}
+						%>
+			m_<%= propInfo.Name %> = new ToOneRelation(typeof(<%= relation.Name %>), "<%= fieldName %>", null);
+					<%
+					}
+					else if(isToMany(propInfo))
+					{
+						foreach(Attribute toManyAttr in propInfo.GetCustomAttributes(true))
+						{
+							if(toManyAttr is Storm.Attributes.ToManyAttribute)
+							{
+								relation = ((Storm.Attributes.ToManyAttribute)toManyAttr).RelationTo;
+								PropertyInfo targetProp = relation.GetProperty(((Storm.Attributes.ToManyAttribute)toManyAttr).RelationName);
+								foreach(Attribute targetAttr in targetProp.GetCustomAttributes(true))
+								{
+									if(targetAttr is Storm.Attributes.ColumnAttribute)
+										fieldName = ((Storm.Attributes.ColumnAttribute)targetAttr).DbColumn;
+								}
+							}
+						}
+						%>
+			m_<%= propInfo.Name %> = new ToOneRelation(typeof(<%= relation.Name %>), "<%= fieldName %>", null, false);
+						<%
+					}
+					//notFirst = true;
+				}
+			} %> 
+			<%} %>
+		}
+		
+		<%
+		if(Factory != null){
+			foreach(MethodInfo mInfo in Factory.GetMethods(BindingFlags.DeclaredOnly|BindingFlags.Instance|BindingFlags.Public))
+			{
+				StringBuilder paramFullString = new StringBuilder();
+				Hashtable paramEntries = new Hashtable();
+				bool notFirst = false;
+				foreach(ParameterInfo pInfo in mInfo.GetParameters())
+				{
+					if(notFirst)
+						paramFullString.Append(", ");
+					paramFullString.Append(pInfo.ParameterType.Name);
+					paramFullString.Append(" ");
+					paramFullString.Append(pInfo.Name);
+					foreach(Attribute paramAttr in pInfo.GetCustomAttributes(true))
+					{
+						if(paramAttr is Storm.Attributes.ParameterDefAttribute)
+						{
+							foreach(PropertyInfo propInfo in m_properties)
+							{
+								if(((Storm.Attributes.ParameterDefAttribute)paramAttr).PropertyName == propInfo.Name)
+								{
+									if(isToOne(propInfo))
+									{
+										paramEntries.Add(((Storm.Attributes.ParameterDefAttribute)paramAttr).PropertyName+".Object", pInfo.Name);
+									}
+									else
+									{
+										paramEntries.Add(((Storm.Attributes.ParameterDefAttribute)paramAttr).PropertyName, pInfo.Name);
+									}
+								}
+							}
+						}
+					} 
+					notFirst = true;
+				} %> 
+		public <%= m_type.Name %>Impl(<%= paramFullString.ToString() %>)
+		{
+			markNew();
+					<%	foreach(PropertyInfo propInfo in m_properties)
+						{ 
+							String fieldName = String.Empty;
+							foreach(Attribute propAttr in propInfo.GetCustomAttributes(true))
+							{									
+								if(propAttr is Storm.Attributes.ToManyAttribute)
+								{	
+									Type targetType = ((Storm.Attributes.ToManyAttribute)propAttr).RelationTo;
+									PropertyInfo targetProp = targetType.GetProperty(((Storm.Attributes.ToManyAttribute)propAttr).RelationName);
+									foreach(Attribute targetAttr in targetProp.GetCustomAttributes(true))
+									{
+										if(targetAttr is Storm.Attributes.ColumnAttribute)
+											fieldName = ((Storm.Attributes.ColumnAttribute)targetAttr).DbColumn;
+									}%>
+			m_<%= propInfo.Name %> = new ToManyRelation(typeof(<%= ((Storm.Attributes.ToManyAttribute)propAttr).RelationTo.Name %>), "<%= fieldName %>", null, true);
+								<%} 
+								else if(propAttr is Storm.Attributes.ToOneAttribute)
+								{ 
+									Type targetType = ((Storm.Attributes.ToOneAttribute)propAttr).RelationTo;
+									PropertyInfo targetProp = targetType.GetProperty(((Storm.Attributes.ToOneAttribute)propAttr).RelationName);
+									foreach(Attribute targetAttr in targetProp.GetCustomAttributes(true))
+									{
+										if(targetAttr is Storm.Attributes.ColumnAttribute)
+											fieldName = ((Storm.Attributes.ColumnAttribute)targetAttr).DbColumn;
+									}%>
+			m_<%= propInfo.Name %> = new ToOneRelation(typeof(<%= ((Storm.Attributes.ToOneAttribute)propAttr).RelationTo.Name %>), "<%= fieldName %>", null);
+								<%} 
+							}
+						}%>
+						<%
+						IDictionaryEnumerator enumerator = paramEntries.GetEnumerator();
+						while(enumerator.MoveNext()){%>
+			m_<%= enumerator.Key %> = <%= enumerator.Value %>;
+						<%} %>
+		}
+			<%} 
+		}%>
+
+		internal <%= m_type.Name %>Impl(
+			Key id, 
+			Timestamp timestamp, 
+			params DictionaryEntry[] parameters)
+		{ 
+			markClean();
+			m_id = id;
+			m_timestamp = timestamp;
+			FieldInfo fInfo;
+			Type thisType = this.GetType();
+			Type domainObjectType = typeof(<%= m_type.Name %>);
+			
+			IEnumerator enumerator = parameters.GetEnumerator();
+
+			while(enumerator.MoveNext())
+			{
+				if(((DictionaryEntry)enumerator.Current).Value != null)
+				{
+					if(((DictionaryEntry)enumerator.Current).Value.GetType() == typeof(ToOneRelation))
+					{ 
+						<%
+						foreach(PropertyInfo propInfo in m_properties)
+						{ 
+							foreach(Attribute propAttr in propInfo.GetCustomAttributes(true))
+							{
+								if(propAttr is Storm.Attributes.ToOneAttribute)
+								{ %>
+						if((String)((DictionaryEntry)enumerator.Current).Key == "<%= propInfo.Name %>")
+						{ 
+							m_<%= propInfo.Name %> = (ToOneRelation)((DictionaryEntry)enumerator.Current).Value;
+							continue;
+						}
+							<%} 
+							}
+					}%>
+					} 
+					if(((DictionaryEntry)enumerator.Current).Value.GetType() == typeof(ToManyRelation))
+					{ 
+						<%
+						foreach(PropertyInfo propInfo in m_properties)
+						{ 
+							foreach(Attribute propAttr in propInfo.GetCustomAttributes(true))
+							{
+								if(propAttr is Storm.Attributes.ToManyAttribute)
+								{ %>
+						if((String)((DictionaryEntry)enumerator.Current).Key == "<%= propInfo.Name %>")
+						{ 
+							m_<%= propInfo.Name %> = (ToManyRelation)((DictionaryEntry)enumerator.Current).Value;
+							continue;
+						}
+							<%	} 
+							}
+						}%>
+					}
+				} 
+				if(this.GetType().GetProperty((String)((DictionaryEntry)enumerator.Current).Key) != null)
+				{
+					string variable = "m_" + (String)((DictionaryEntry)enumerator.Current).Key;
+					if((fInfo = thisType.GetField(variable, BindingFlags.DeclaredOnly|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance)) != null)
+					{
+							fInfo.SetValue(this, ((DictionaryEntry)enumerator.Current).Value);
+					}
+				}
+			}
+		}
+#endregion
+
+#region Methods
+		<%
+		foreach(MethodInfo mInfo in m_type.GetMethods(BindingFlags.DeclaredOnly|BindingFlags.Instance|BindingFlags.Public))
+		{
+			if(mInfo.IsAbstract)
+			{
+				foreach(Attribute mAttr in mInfo.GetCustomAttributes(true))
+				{
+					if(mAttr is Storm.Attributes.AdderAttribute)
+					{
+						ParameterInfo[] parameters = mInfo.GetParameters();
+						if(parameters.Length != 1)
+						{
+							throw new ApplicationException("Parameter Length not 1: Parameter Length of an Adder Method must be 1");
+						}
+						String returnType = mInfo.ReturnType.Name;
+						if(returnType == "Void")
+							returnType = returnType.ToLower();
+						foreach(ParameterInfo paramInfo in parameters)
+						{ %>
+		public override <%= returnType %> <%= mInfo.Name %>(<%= paramInfo.ParameterType.Name %> <%= paramInfo.Name %>)
+		{
+			if(<%= paramInfo.Name %> != null)
+			{
+				<%= paramInfo.Name %>.<%= ((Storm.Attributes.AdderAttribute)mAttr).TargetProperty %> = this;
+				m_<%= ((Storm.Attributes.AdderAttribute)mAttr).LocalProperty %>.Add(<%= paramInfo.Name %>);
+				this.markDirty();
+			}
+			else
+			{
+				throw new ApplicationException();
+			}
+		}
+						<%}
+					}
+				}
+			}	
+		} 
+		%>
+		
+		public override void delete()
+		{
+			<%
+			foreach(PropertyInfo propInfo in m_properties)
+			{ 
+				foreach(Attribute propAttr in propInfo.GetCustomAttributes(true))
+				{
+					if(propAttr is Storm.Attributes.ToManyAttribute)
+					{ %>
+			foreach(<%= ((Storm.Attributes.ToManyAttribute)propAttr).RelationTo.Name %> <%= ((Storm.Attributes.ToManyAttribute)propAttr).RelationTo.Name.ToLower() %> in <%= propInfo.Name %>)
+			{
+				<%= ((Storm.Attributes.ToManyAttribute)propAttr).RelationTo.Name.ToLower() %>.delete();
+			}
+				<%	} 
+				}
+			}%>
+			
+			this.markRemoved();
+		}
+#endregion
+
+#region Properties
+		<%	
+		//Process all public and non-public properties and write them out.
+		foreach(PropertyInfo pInfo in m_type.GetProperties(BindingFlags.NonPublic|BindingFlags.Public|BindingFlags.Instance))
+		{ 
+			if(hasAttributes(pInfo))
+			{ 
+				if(pInfo.PropertyType.IsPublic){ %>
+		public override <%= pInfo.PropertyType.Name %> <%= pInfo.Name %> 
+				<%} else{ %>
+		protected override <%= pInfo.PropertyType.Name %> <%= pInfo.Name %>
+				<%} %>
+		{
+				<%if(hasGetMethod(pInfo)){ %>
+			get
+			{
+					<%if(!isToMany(pInfo) && !isToOne(pInfo) && (!m_primaryKeys.Contains(pInfo.Name)))
+					{ %>
+				if(m_<%= pInfo.Name %> == null)
+						<%
+						switch(pInfo.PropertyType.Name)
+						{
+							case "Int32" : %>
+					return 0;			
+								<%break;
+							case "Double" : %>
+					return 0.0;			
+								<%break;
+							case "String" : %>
+					return String.Empty;			
+								<%break;
+							case "DateTime" : %>
+					return new DateTime(0);			
+								<%break;
+							default : %>
+					throw new NullReferenceException();
+								<%break;
+						}
+					}
+					if(m_primaryKeys.Contains(pInfo.Name) && !isToOne(pInfo)){%>
+				if(m_id == null)
+						<%
+						switch(pInfo.PropertyType.Name)
+						{
+							case "Int32" : %>
+					return 0;			
+								<%break;
+							case "Double" : %>
+					return 0.0;			
+								<%break;
+							case "String" : %>
+					return String.Empty;			
+								<%break;
+							case "DateTime" : %>
+					return new DateTime(0);			
+								<%break;
+							default : %>
+					throw new NullReferenceException();
+								<%break;
+						} %>
+				return (<%= pInfo.PropertyType.Name %>)m_id[<%= m_primaryKeys.IndexOf(pInfo.Name) %>];
+					<%}
+					else if(isToOne(pInfo)) { %>
+				return (<%= pInfo.PropertyType.Name %>)m_<%= pInfo.Name %>.Object;
+					<%}
+					else { %>
+				return (<%= pInfo.PropertyType.Name %>)m_<%= pInfo.Name %>;
+					<%} %>
+			}
+				<%} %>
+				<%if(hasSetMethod(pInfo)){ %>
+			set
+			{
+					<%if(isToOne(pInfo)) { %>
+				m_<%= pInfo.Name %>.Object = value;
+					<%}
+					else { 
+						if(m_primaryKeys.Contains(pInfo.Name))
+						{
+					%>
+				if(m_id == null)
+					m_id = new Key(new object[] {value});
+				else
+					m_id[<%= m_primaryKeys.IndexOf(pInfo.Name) %>] = value;
+					<%
+						}
+					%>
+				m_<%= pInfo.Name %> = value;
+				markDirty();
+					<%
+					} %>
+			}
+				<%
+				} %>
+		}
+			<%
+			} 
+		} %>
+				
+		public static FactoryImpl Factory
+		{
+			get
+			{
+				return m_FactoryImpl;
+			}
+		}
+		
+		public static FinderImpl Finder
+		{
+			get
+			{
+				return m_FinderImpl;
+			}
+		}
+		
+		public override bool isNull(string propertyName)
+		{
+			switch(propertyName)
+			{
+			<%
+				foreach(PropertyInfo pInfo in m_type.GetProperties(BindingFlags.NonPublic|BindingFlags.Public|BindingFlags.Instance))
+				{ 
+					if(hasAttributes(pInfo))
+					{
+						if(!isToMany(pInfo) && !isToOne(pInfo) && !m_primaryKeys.Contains(pInfo.Name))
+						{
+			%>
+				case "<%= pInfo.Name %>":
+					if(m_<%= pInfo.Name %> == null) return true;
+					break;
+			<%
+						}
+						else if(isToOne(pInfo))
+						{
+			%>
+				case "<%= pInfo.Name %>":
+					if(m_<%= pInfo.Name %>.Object == null) return true;
+					break;
+			<%
+						}
+					}
+				}
+			%>
+				default:
+					break;
+			}
+			return false;
+		}
+#endregion
+	}
+
+<script runat="template">
+	private Type m_type = null;
+	private ArrayList m_properties = null;
+	private ArrayList m_primaryKeys = null;
+	private Type m_factory = null;
+	private Type m_finder = null;
+	
+	void initType()
+	{
+		m_type = assemblyLoader.ClassType;
+	}
+	
+	bool hasAttributes(PropertyInfo pInfo)
+	{
+		return pInfo.GetCustomAttributes(true).Length > 0 ? true : false;
+	}
+	
+	bool hasGetMethod(PropertyInfo pInfo)
+	{
+		return pInfo.GetGetMethod(true) is MethodInfo ? true : false;
+	}
+	
+	bool hasSetMethod(PropertyInfo pInfo)
+	{
+		return pInfo.GetSetMethod(true) is MethodInfo ? true : false;
+	}
+
+	string getColumnName(PropertyInfo propInfo)
+	{
+		String columnName = String.Empty;
+		foreach(Attribute propAttr in propInfo.GetCustomAttributes(true))
+		{
+			if(propAttr is Storm.Attributes.ColumnAttribute)
+				columnName = ((Storm.Attributes.ColumnAttribute)propAttr).DbColumn;
+		}
+		return columnName;
+	}
+	
+	bool isToMany(PropertyInfo pInfo)
+	{
+		foreach(Attribute attr in pInfo.GetCustomAttributes(true))
+		{
+			if(attr is Storm.Attributes.ToManyAttribute)
+				return true;
+		}
+		return false;
+	}
+
+	bool isToOne(PropertyInfo pInfo)
+	{
+		foreach(Attribute attr in pInfo.GetCustomAttributes(true))
+		{
+			if(attr is Storm.Attributes.ToOneAttribute)
+				return true;
+		}
+		return false;
+	}
+	
+	bool isColumn(PropertyInfo pInfo)
+	{
+		foreach(Attribute attr in pInfo.GetCustomAttributes(true))
+		{
+			if(attr is Storm.Attributes.ColumnAttribute)
+				return true;
+		}
+		return false;
+	}
+	
+	bool isPrimaryKey(PropertyInfo pInfo)
+	{
+		foreach(Attribute attr in pInfo.GetCustomAttributes(true))
+		{
+			if(attr is Storm.Attributes.PrimaryKeyAttribute)
+				return true;
+		}
+		return false;
+	}
+	
+	bool isSurrogateKey()
+	{
+		foreach(Attribute attr in m_type.GetCustomAttributes(false))
+			if(attr is Storm.Attributes.TableAttribute)
+				return ((Storm.Attributes.TableAttribute)attr).KeyIsSurrogate ? true : false;
+		return false;
+	}
+	
+	void processProperties()
+	{
+		if(m_properties == null)
+			m_properties = new ArrayList();
+		foreach(PropertyInfo pInfo in m_type.GetProperties(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance))
+		{
+			m_properties.Add(pInfo);
+		}
+	}
+	
+	void processPrimaryKeys()
+	{
+		if(m_primaryKeys == null)
+			m_primaryKeys = new ArrayList();
+		foreach(PropertyInfo pInfo in m_type.GetProperties(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance))
+		{
+			foreach(Attribute propAttr in pInfo.GetCustomAttributes(true))
+			{
+				if(propAttr is Storm.Attributes.PrimaryKeyAttribute)
+					m_primaryKeys.Add(pInfo.Name);
+			}
+		}
+	}
+	
+	//only one factory is allowed
+	private Type Factory
+	{
+		get
+		{
+			if(m_factory == null)
+			{
+				foreach(Type nType in m_type.GetNestedTypes())
+				{
+					if(nType.IsClass && nType.IsAbstract)
+					{
+						foreach(Attribute attr in nType.GetCustomAttributes(true))
+						{
+							if(attr is Storm.Attributes.FactoryAttribute)
+							{
+								m_factory = nType;
+								return m_factory;
+							}
+						}
+					}
+				}
+			}
+			return m_factory;
+		}
+	}
+
+	private Type Finder
+	{
+		get
+		{
+			if(m_finder == null)
+			{
+				foreach(Type nType in m_type.GetNestedTypes())
+				{
+					if(nType.IsClass && nType.IsAbstract)
+					{
+						foreach(Attribute attr in nType.GetCustomAttributes(true))
+						{
+							if(attr is Storm.Attributes.FinderAttribute)
+							{
+								m_finder = nType;
+								return m_finder;
+							}
+						}
+					}
+				}
+			}
+			return m_finder;
+		}
+	}
+</script>

@@ -1,0 +1,12 @@
+<!-- edited with XMLSPY v5 U (http://www.xmlspy.com) by Abteilung Informatik (Hochschule Rapperswil) -->
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:y="http://dotnet.hsr.ch/HsrOrderApp_S3" targetNamespace="http://dotnet.hsr.ch/HsrOrderApp_S3">
+	<types>
+		<xs:schema>
+			<xs:import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="D:\DotNetCC\Projects\TechnologyStudies\OrderApp\HsrOrderApp_S3\WebServiceInterface\CGOps.xsd"/>
+		</xs:schema>
+	</types>
+	<message name="messageName"/>
+	<portType name="typeName"/>
+	<binding name="bindingName" type="y:typeName"/>
+	<service name="serviceName"/>
+</definitions>

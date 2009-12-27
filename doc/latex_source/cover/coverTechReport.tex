@@ -1,0 +1,85 @@
+\documentclass[a5paper]{report} %LaTeX Standard
+\usepackage[ngerman]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[pdftex]{graphicx}
+\usepackage[pdftex, colorlinks=true, 
+	linkcolor=blue, 
+	citecolor=blue, 
+	urlcolor=blue, 
+	plainpages=false]{hyperref}
+\usepackage{url}
+\usepackage{here}
+\usepackage{latexsym}
+\usepackage[hang,small,bf]{caption2}
+
+\begin{document}
+\selectlanguage{ngerman}
+%titelseite erstellen
+\begingroup
+	\renewcommand{\thepage}{title}
+	\begin{titlepage}
+		\vspace*{-2cm}
+		\begin{center}
+			\includegraphics[width=\linewidth]{storm} \\[2cm]
+		\end{center}
+
+		\begin{center}
+		{\Huge \textbf{
+		Technical Report}}\\[5mm]
+		\today
+		\end{center}
+			
+			%\noindent
+		\vspace*{12mm}
+		{\large \textbf{
+			\hspace*{1mm} \\
+			Authors: \\[2mm]
+			\href{mailto:storm@winiger.ch}{Marc Winiger} $<$storm@winiger.ch$>$ \\
+			\href{mailto:storm@elchonline.net}{Michael Egli} $<$storm@elchonline.net$>$}}
+	\newpage
+	
+%	\renewcommand{\thepage}{dedication}
+%	\thispagestyle{empty}
+%		\begin{center}	
+%			\vspace*{20mm}
+%			{\large \textit{für alle die wir kennen}}
+%		\end{center}
+%	\newpage
+	
+	\renewcommand{\thepage}{hsr}
+	\thispagestyle{empty}
+	
+	\begin{center}
+		\underline{\textbf{
+		Storm Template-based Object Relational Mapper}}\\[1cm]
+	\end{center}
+		
+	\noindent
+	This documentation has been written at Hochschule Rapperswil, department of computer science.
+		
+	\begin{figure}[H]
+		\begin{center}
+			\includegraphics[width=5cm]{HSR} \vspace{3mm}\\
+			\url{http://www.i.hsr.ch}
+		\end{center}
+	\end{figure}
+
+	\vspace*{2cm}
+	\begin{tabbing}
+	1234567890123 \= \kill
+	Authors: \> Marc Winiger\\
+					 \> Michael Egli\\
+	Tutor: \> Prof. H. Huser\\
+	Expert: \>	Dr. H. Bärfuss\\ 
+	\end{tabbing}
+
+		\vspace*{5mm}
+		\noindent
+		{\small
+			This Document is a property of Hochschule Rapperswil, Switzerland.\\
+			\copyright  2003, Hochschule Rapperswil\\
+		Typeset by \LaTeX\ }
+	\end{titlepage}
+\endgroup
+\end{document}
+

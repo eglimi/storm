@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema id="GeneralDTO" xmlns="http://dotnet.hsr.ch/HsrOrderApp_S4" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://dotnet.hsr.ch/HsrOrderApp_S4">
+	<xs:simpleType name="Role">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="BrowseUsers" />
+			<xs:enumeration value="BrowseProducts" />
+			<xs:enumeration value="BrowseProductsExt" />
+			<xs:enumeration value="BrowseOrders" />
+			<xs:enumeration value="BrowseOwnOrders" />
+			<xs:enumeration value="MakeOrders" />
+			<xs:enumeration value="ChangeProductData" />
+			<xs:enumeration value="ChangeOrders" />
+			<xs:enumeration value="ChangeUsers" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="Address">
+		<xs:sequence>
+			<xs:element name="Id" type="xs:int" />
+			<xs:element name="Street" type="xs:string" />
+			<xs:element name="City" type="xs:string" />
+			<xs:element name="Postalcode" type="xs:string" />
+			<xs:element name="Phone" type="xs:string" />
+			<xs:element name="Email" type="xs:string" />
+			<xs:element name="Timestamp" type="Timestamp" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Person">
+		<xs:sequence>
+			<xs:element name="Id" type="xs:int" />
+			<xs:element name="Name" type="xs:string" />
+			<xs:element name="Password" type="xs:string" />
+			<xs:element name="Roles" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Role" type="Role" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Addresses" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Address" type="Address" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Timestamp" type="Timestamp" nillable="true" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="DummyPersonElement" type="Person" />
+	<xs:complexType name="Order">
+		<xs:sequence>
+			<xs:element name="Id" type="xs:int" />
+			<xs:element name="OrderDate" type="xs:dateTime" />
+			<xs:element name="ShippedDate" type="xs:dateTime" />
+			<xs:element name="OrderDetails" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="OrderDetail" minOccurs="0" maxOccurs="unbounded" type="OrderDetail"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Timestamp" type="Timestamp" nillable="true" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Product">
+		<xs:sequence>
+			<xs:element name="Id" type="xs:int" />
+			<xs:element name="Name" type="xs:string" />
+			<xs:element name="QuantityPerUnit" type="xs:double" />
+			<xs:element name="UnitPrice" type="xs:double" />
+			<xs:element name="Category" type="xs:string" />
+			<xs:element name="Timestamp" type="Timestamp" nillable="true" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="DummyProductElement" type="Product"></xs:element>
+	<xs:complexType name="OrderDetail">
+		<xs:sequence>
+			<xs:element name="ProductId" type="xs:int" />
+			<xs:element name="UnitPrice" type="xs:double" />
+			<xs:element name="Quantity" type="xs:int" />
+			<xs:element name="Timestamp" type="Timestamp" nillable="true" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="DummyOrderElement" type="Order"></xs:element>
+	<xs:complexType name="Timestamp">
+		<xs:sequence>
+			<xs:element name="part" type="xs:unsignedByte" minOccurs="8" maxOccurs="8" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Products">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Product" type="Product" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="UpdateOrder">
+		<xs:sequence>
+			<xs:element name="AddOrderDetails" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="OrderDetail" type="OrderDetail" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="RemoveOrderDetails" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="RemoveOrderDetail" type="VersionId" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="UpdateOrderDetails" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="OrderDetail" type="OrderDetail" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Id" type="xs:int" />
+			<xs:element name="OrderData" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="OrderDate" type="xs:dateTime" />
+						<xs:element name="ShippedDate" type="xs:dateTime" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Timestamp" type="Timestamp" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="PersonId" type="xs:int" />
+	<xs:element name="ChangePersonResults">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="UpdatePersonResults" minOccurs="0" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="UpdatePersonResult" type="UpdatePersonResult" minOccurs="0" maxOccurs="unbounded" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="UpdatePersonResult" type="UpdatePersonResult" />
+	<xs:element name="UpdatePerson" type="UpdatePerson" />
+	<xs:complexType name="UpdatePerson">
+		<xs:sequence>
+			<xs:element name="Id" type="xs:int" />
+			<xs:element name="UpdatePersonData" maxOccurs="1" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Name" type="xs:string" />
+						<xs:element name="Password" type="xs:string" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="AddRoles" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Role" type="Role" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="RemoveRoles" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Role" type="Role" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="UpdateAddresses" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Address" type="Address" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="AddAddresses" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Address" type="Address" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="RemoveAddresses" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Address" type="VersionId" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="AddOrders" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Order" type="Order" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="UpdateOrders" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="UpdateOrder" type="UpdateOrder" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="RemoveOrders" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Order" type="VersionId" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Timestamp" type="Timestamp" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="PersonInfo" nillable="false" type="Person" />
+	<xs:element name="ChangePersons">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="UpdatePersons" minOccurs="0" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="UpdatePerson" type="UpdatePerson" minOccurs="0" maxOccurs="unbounded" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="DeletePersons" maxOccurs="1" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="DeletePerson" minOccurs="0" maxOccurs="unbounded" type="VersionId"></xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="InsertPersons" minOccurs="0" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Person" type="Person" minOccurs="0" maxOccurs="unbounded" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="UpdatePersonResult">
+		<xs:sequence>
+			<xs:element name="IdentResult" type="IdentResult" maxOccurs="1" minOccurs="0" />
+			<xs:element name="UpdateAddressResults" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="UpdateAddressResult" type="IdentResult" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="UpdateOrderResults" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="UpdateOrderResult" type="UpdateOrderResult" minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="IdentResult">
+		<xs:sequence>
+			<xs:element name="InputId" type="xs:int" />
+			<xs:element name="ResultId" type="xs:int" />
+			<xs:element name="Timestamp" type="Timestamp" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VersionId">
+		<xs:sequence>
+			<xs:element name="Id" type="xs:int" />
+			<xs:element name="Timestamp" type="Timestamp" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="UpdateOrderResult">
+		<xs:sequence>
+			<xs:element name="IdentResult" type="IdentResult" minOccurs="0" maxOccurs="1" />
+			<xs:element name="UpdateOrderDetailResults" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="UpdateOrderDetailResult" type="Timestamp" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="PersonName" type="xs:string"></xs:element>
+	<xs:element name="ProductId" type="xs:int"></xs:element>
+	<xs:element name="Product" type="Product"></xs:element>
+	<xs:element name="Category" type="xs:string"></xs:element>
+	<xs:element name="DateRange" type="DateRange"></xs:element>
+	<xs:complexType name="DateRange">
+		<xs:sequence>
+			<xs:element name="StartDate" type="xs:dateTime" />
+			<xs:element name="EndDate" type="xs:dateTime" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Orders">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Order" type="Order" maxOccurs="unbounded" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DateRangeBy">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PersonId" type="xs:int" />
+				<xs:element name="DateRange" type="DateRange" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Persons">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Person" type="Person" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ChangeProducts">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="InsertProducts" minOccurs="0" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Product" type="Product" maxOccurs="unbounded" minOccurs="0" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="DeleteProducts" minOccurs="0" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Product" type="VersionId" minOccurs="0" maxOccurs="unbounded" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="UpdateProducts" minOccurs="0" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Product" type="Product" minOccurs="0" maxOccurs="unbounded" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ChangeProductResults">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Results" type="IdentResult" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

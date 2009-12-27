@@ -1,0 +1,108 @@
+\chapter*{Aufgabenstellung}
+\addcontentsline{toc}{chapter}{Aufgabenstellung}
+
+\section*{Einführung}
+Am .NET CC wurden im Rahmen des Softnet-Projektes Architekturvarianten für Enterprise Applikationen mit .NET untersucht und mit verschiedenen Referenzimplementationen für eine einfache Bestellapplikation konkretisiert.
+Eine Variante dieser Bestellapplikation (HsrOrderApp\_S3) verwendet im BusinenssLayer ein objektorientiertes Domain-Modell. Dieses Modell wird mit einem ojektrelationalen Mapping auf die DB-Tabellen abgebildet und bietet ein sehr grob granulares und doch mächtiges Webservice Interface an. Verglichen mit der Funktionalität, welche die Applikation anbietet, wurde sehr viel Code benötigt. Dafür ist das resultierende System sehr flexibel, überschaubar und erweiterbar. 
+
+\section*{Zielsetzungen dieser Diplomarbeit}
+Die erste Aufgabe der Diplomanden ist die Analyse der bestehenden Applikation. Es sollen Implementationen gesucht werden, wo mit generativen oder generischen Ansätzen die Komplexität der SW und damit die Entwicklungs- und Wartungsaufwendungen reduziert werden können. Die Resultate müssen von allgemeiner Natur sein und sollen auch in anderen Enterprise Applikati-onen einsetzbar sein. Nachfolgend wird kurz auf einige bereits identifizierte Problemkreise eingegangen:
+
+\section*{Objektrelational Mapping}
+Die HsrOrderApp\_S3 arbeitet mit einem Domain-Model in klassischem OO Stil. Das Mapping dieses Modells benötigte einiges an Codieraufwand. Es wurden aber bereits generische Ansätze verwendet um diesen in Grenzen zu halten (siehe z. B. AbstractMapper). 
+
+\section*{Modell Transformationen}
+Die HsrOrderApp\_S3 benötigt eine zweistufige Modelltransformation, wenn sie von einem Web-service aus angesprochen wird: Eine zwischen der Fassade und dem Domain-Model und eine zweite für den Webservice. Diese Transformationen sind für den Entwickler sehr mühsam und fehleranfällig.
+
+Ein möglicher Lösungsansatz ist die Verwendung des Tools CodeSmith. CodeSmith ist ein sehr mächtiges OpenSource Werkzeug für das automatische Generieren von Code. Für die Parametrisierung der CodeSmith Templates soll XML verwendet werden.
+
+\section*{Erwartete Resultate}
+\label{sec:erwarteteResultate}
+	\begin{enumerate}
+		\item Analyse und Dokumentation der dieser Arbeit zugrundeliegenden Patterns und "Best Practices" für den Entwurf des OO-Domain-Modell, der Business-Facades und der Service-Interfaces.
+		\item Analyse, wo die Verwendung von generischen oder von generativen Ansätzen sinnvoll ist. Ausarbeitung von "Best Practices" (inkl. Varianten, untermauert mit Code-Beispielen)
+		\item Entwicklungsframework für generative Ansätze für Modell-Transformationen basierend auf CodeSmith:
+		\begin{itemize}
+			\item Eine Beschreibungssprache basierend auf XML und XML-Schema für die Parametrisierung der CodeSmith Templates.
+			\item Ein Satz von Templates für Code Smith die unter anderem das O/R Mapping und die Modell Transformationen generativ lösen.
+			\item Einbindung der Templates in den Make-Prozess (für Visual Studio .NET).  
+			\item Evtl. ein Tutorial zu Codesmith.
+		\end{itemize}
+		\item Überarbeitete und dokumentierte HsrOrderApp
+		\item allfällige weitere Aspekte und Konzepte, die sich im Laufe der Arbeit ergeben.
+	\end{enumerate}
+	
+\section*{Vorgehensweise (Vorschlag):}
+	\begin{enumerate}
+		\item Die HsrOrderApp\_S3 als ganzes, die verwendeten Architektur- und Designpatterns und das O/R Mapping müssen von den Diplomanden studiert und verstanden werden. Litera-turstudium (u.a das Buch von Fowler, \cite{Fowler03}).
+		\item Technologiestudien: CodeSmith, notwendige .NET-Technologien.
+		\item Analyse wo die Verwendung von einem generischen Ansatz sinnvoll ist.
+		\item Eine Beschreibungssprache basierend auf XML und XML-Schema die als Parametrisierung der CodeSmith Templates dient definieren.
+		\item Templates erstellen.
+		\item Implementation der HsrOrderApp basierend auf den erarbeiteten generativen und generischen Ansätzen. Dokumentation.
+	\end{enumerate}
+		
+\section*{Entwicklungsumgebung}
+MS Windows 2000 mit IIS, MS SQL Server 2000, Visual Studio :NET 2003
+
+\section*{Dokumentation}
+Es ist nach einem Projektplan zu arbeiten. Der tatsächliche Aufwand ist zu erfassen. Ein individuelles Projekttagebuch ist zu führen, aus dem ersichtlich wird, welche Arbeiten durchgeführt wurden (inkl. Zeitaufwand). Diese Angaben sollten u.a. eine individuelle Beurteilung ermöglichen.
+
+Abzugeben ist ein Bericht (1 Exemplar auf Papier, 3 Exemplaren auf CD-ROM), welcher enthält:
+	\begin{itemize}
+		\item die Aufgabestellung
+		\item eine Zusammenfasssung der Arbeit auf einer Seite auf dem dafür vorgegebenen Formular
+		\item ein Management Summary
+		\item ein in sich geschlossener technischer Bericht mit einer ausgiebigen Diskussion und Dokumentation der geforderten Problemanalysen und der Problemlösungskonzepte inklusive Literaturstudium (gemäss Kapitel \ref{sec:erwarteteResultate})
+		\item persönliche Berichte der Studierenden zu ihren Erfahrungen in der Arbeit
+		\item bei der Arbeit erstellten Dokumente
+		\item die Programme (Softcopy)
+		\item der Projektplan mit den geplanten und tatsächlichen Aufwände, Projekttagebuch
+	\end{itemize}
+	
+Aus dem Bericht muss klar hervorgehen, wer für welchen Teil der Arbeit und des Berichtes verantwortlich ist.
+
+Nach Abgabe des Berichts ist ein Poster vorzubereiten, welches die wesentlichen Informationen über die Arbeit für die Ausstellung der Diplomarbeit enthält.
+
+\section*{Termine}
+	\begin{flushleft}
+		Abgabe der Aufgabestellung und Beginn der Arbeit: Montag 20. Okt. 03
+		
+		Zwischenpräsentation für Experte: Mi. 26. Nov, nachmittags
+
+
+		Abgabe des Berichts und Ende der Arbeit: Mi. 10. Dez. 03, 17 Uhr (prov.)
+
+		Ausstellung und Vorführung der Arbeit: Fr. 12. Dez.03
+
+		Mündliche Prüfung zur Diplomarbeit: 12.01.03 - 17.01.03
+
+		Ausstellung der Poster und Diplomfeier: Freitag 23.01.2004
+	\end{flushleft}
+	
+In der ersten Woche sind Projektauftrag und die Projekt-Planung mit Meilensteinen zu erstellen. Beides muss vom Auftraggeber und Betreuer genehmigt werden.
+Bei der Projektplanung ist zu beachten, dass bis zur Zwischenpräsentation für den Experten erste konkrete Resultate vorliegen.
+
+\section*{Betreuer}
+	\begin{flushleft}
+		Betreuer: H. Huser
+
+		Experte: Dr. Hans Bärfuss
+	\end{flushleft}
+	
+	Mit dem Betreuer ist (mindestens) eine wöchentliche Besprechung durchzuführen.
+Termin: 
+
+Falls notwendig, können weitere Besprechungen / Diskussionen einberufen werden.
+Themen:
+	\begin{itemize}
+		\item Stand des Projektes
+		\item Nächste Schritte
+		\item Überprüfung der Meilensteine
+		\item Diskussion fachlicher Themen (bei Bedarf)
+	\end{itemize}
+
+Zu jeder Besprechung muss ein Kurzprotokoll erstellt werden, welches spätestens 2 Tage nach der Sitzung per e-mail an den Betreuer zu senden ist.
+
+Rapperswil, 20. Okt. 03, H. Huser
+

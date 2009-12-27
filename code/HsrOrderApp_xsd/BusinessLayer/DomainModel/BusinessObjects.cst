@@ -1,0 +1,44 @@
+<%@ CodeTemplate Language="C#" TargetLanguage="C#" %>
+<%@ Property Name="xhelper" Type="XParser.XHelper" %>
+<%@ Assembly Name="XsdParser" %>
+<%@ Import Namespace="System.Collections" %>
+<%@ Import Namespace="XParser" %>
+
+<%
+
+	foreach(DictionaryEntry attrs in xhelper.getAttributes()) { %>
+	public class <%= attrs.Key %> : DomainObject
+	{
+
+		public <%= attrs.Key %>()
+		{
+			<% foreach(XAttribute xa in (ArrayList)attrs.Value) { %>
+			
+			private <%= xa.AttributeType %> <%= xa.AttributeName %>;
+			
+			<%	} %>
+		}
+
+	}
+<%	} %>
+<script runat="template">
+/*
+	public string getAttributeList(IList attributes)
+	{
+
+		StringBuilder attributeList = new StringBuilder();
+
+		foreach(CustomAttribute attribute in attributes)
+		{
+			attributeList.Append(attribute.AttributeType + " " + attribute.AttributeName.ToLower() + ", ");
+		}
+		
+		string retvalue = attributeList.ToString();
+		if( retvalue.Length > 1 )
+		{
+			retvalue = retvalue.Substring(0, retvalue.Length - 2);
+		}
+		return retvalue;
+	}
+*/
+</script>

@@ -1,0 +1,96 @@
+\chapter{Ausgangslage}
+	
+	Getestet wurde die Funktionalität der HsrOrderApp\_S4. Da diese Applikation alle
+	unterstützten Fälle der Code Generierung abdeckt, ist damit auch die Richtigkeit
+	der Templates gewährleistet.
+
+	\section{Testumgebung}
+		Die Test wurden lokal ausgeführt und damit ist die Testumgebung dieselbe, wie
+		in Kapitel \ref{cha:ressourcen} in der Tabelle \ref{tab:projektMgmtResources}
+		angegeben wurde.
+	
+	\section{Datenbank}
+		Das Design der Datenbank wurde vorgegeben. Es handelt sich dabei um die
+		Datenbank für die HsrOrderApp. Diese wurde für die in dieser Arbeit
+		erstellten Referenzimplementation verwendet und dient auch als Datenbank für 
+		die Tests.
+
+\chapter{HsrOrderApp\_S4}
+	Wir haben entschieden, die bestehenden Tests der HsrOrderApp\_S3 zu erweitern. 
+	Dazu haben wir Facade, WebServices, TestProxy und TestApplikation übernommen 
+	und an unsere Architektur angepasst.
+
+	Getestet wurde damit der generierte Code der Domain Object und der Mapper.
+	
+	\section{Anforderungen an die Applikation}
+	\begin{itemize}
+		\item Neue Objekte
+				
+			Objekte über die Factory erstellen und in der UnitOfWork als new markieren.
+		
+		\item Objekte ändern
+		
+			Geladene Objekte verändern und in der UnitOfWork als dirty markieren.
+		
+		\item Objekte in die Datenbank schreiben
+		
+			Neue Objekte in die Datenbank einfügen und geänderte Objekte in der Datenbank 
+			auf den neusten Stand bringen.
+		
+		\item Objekte aus der Datenbank lesen
+		
+			Die Daten für neu zu erstellende Objekte werden mittels find Methoden aus der 
+			Datenbank geholt.
+		
+		\item Objekte als gelöscht markieren
+		
+			Objekte für das löschen in der Datenbank bei der UnitOfWork registrieren.
+		
+		\item Rekursives Löschen
+		
+			Wird ein Objekt mit ToMany Relationen gelöscht, müssen alle zugeordneten 
+			Objekte vorher auch gelöscht werden.
+				
+		\item Werfen von Concurrency Exceptions
+		
+			Werden versucht veraltete Objekte auf die Datenbank zu schreiben, muss eine 
+			Concurrency Exception geworfen werden.
+		
+	\end{itemize}
+	
+	\section{Durchgeführte Tests}
+		Die folgenden drei Test werden mehrmals hintereinander ausgeführt. Zuerst werden 
+		jeweils die in der letzen Iteration erstellten Objekte gesucht und wenn vorhanden 
+		gelöscht. Objekte einer ToMany Relation müssen von den Mappern automatisch gelöscht
+		werden. Das dies auch wirklich geschieht, wird durch Constraints auf der Datenbank 
+		überprüft.
+	
+		\subsection{Person Test}
+			Es werden drei neue Personen Objekte erstellt. Zu jeder Person werden zwei 
+			Adressen erstellt. Diese werden in die Datenbank geschrieben.
+			
+			Danach werden die Personen Objekte geändert, je eine zusätzliche Adresse 
+			hinzugefügt und ebenfalls in die Datenbank geschrieben.
+		
+		\subsection{Product Test}
+			Es werden 16 Produkte Objekte in vier Kategorien erstellt und auf die Datenbank 
+			geschrieben.
+		
+			Davon werden 12 Objekte verändert und 4 Objekte wieder gelöscht. Diese Operationen 
+			werden in einem Schritt auf der Datenbank ausgeführt.
+			
+		\subsection{Order Test}
+			Die Personen und Produkte aus den vorherigen Tests werden über die Finder Methoden
+			gesucht.
+			
+			Der ersten Person werden drei Bestellungen mit je drei Positionen hinzugefügt. 
+			Diese Änderungen werden auf die Datenbank geschrieben. Danach werden die Positionen 
+			geändert, hinzugefügt und gelöscht.
+	
+	\section{Ergebnisse}
+		Die Tests laufen ohne Fehler durch. Der Trace vom SQL Profiler und eine Kontrolle in 
+		der Datenbank belegen, dass die Einträge auch wirklich geschrieben wurden.
+		
+		Werden während den laufenden Tests die Datenbank-Einträge verändert, sollte eine Concurrency Exception geworfen werden. 
+		Die Applikation stürzt jedoch einer NullReferenzeException ab. Nach beheben dieses Fehlers reagiert alles wie erwartet.
+

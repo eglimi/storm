@@ -1,0 +1,177 @@
+\chapter{Risiken}
+	Neben den üblichen Risiken, die in jedem Projekt bestehen 
+	(Krankheit, persönliche Probleme, etc.) bestehen folgende
+	Risiken:
+	\LTXtable{\linewidth}{./files/inc/tables/projektMgmtRisks}
+	
+\chapter{Projektplan}
+	\section{Versionen}
+		Die Projektpläne sind auf den nächsten Seiten der Dokumentation beigelegt. Folgende Versionen
+		sind verfügbar:
+		\LTXtable{\linewidth}{./files/inc/tables/projektMgmtProjectPlan}
+		\includepdf[pages={1},landscape]{./files/inc/sources/ProjectPlan_v0-1}
+		\includepdf[pages={1},landscape]{./files/inc/sources/ProjectPlan_v0-2}
+		\includepdf[pages={1},landscape]{./files/inc/sources/ProjectPlan_v0-3}
+		\includepdf[pages={1},landscape]{./files/inc/sources/ProjectPlan_v0-4}
+
+		
+	\section{Änderungsbeschreibung}
+		\subsection{Version 0.2}
+			Für die CodeSmith Templates wurde sinnvollerweise ein eigener Task hinzugefügt.
+		\subsection{Version 0.3}
+			Eine Dokumentation von Anwendungen der benutzten Patterns wird nicht benötigt. Erstens kann im
+			Rahmen dieser zeitlich kurzen Arbeit nicht genügend Erfahrung mit verschiedenen Applikationen
+			gesammelt werden, damit eine solche Dokumentation Sinn machen würde, und zweitens gibt es bereits
+			viele Bücher bzw. Berichte die dieses Thema behandeln.
+			
+			Zudem werden schon früher als geplant erste CodeSmith Templates geschrieben, damit Risiken
+			diesbezüglich minimiert werden können.
+		\subsection{Version 0.4}
+			Meilenstein 3 (siehe Beschreibung \hyperlink{milestone3}{Meilenstein 3}) wurde nach hinten verschoben. 
+			Der Grund dafür ist, dass es sich bei diesem Meilenstein um die
+			Dokumentation von Erkenntnissen handelt, die wir erst am Schluss in vollem Umfange besitzen können.
+			
+			Der Task "`Templates erstellen"' wurde an die Implementation der HsrOrderApp\_S4 angepasst. Es hat sich
+			gezeigt, dass es sinnvoll ist, wenn zuerst die Applikation von Hand geschrieben wird und erst anschliessend
+			die entsprechenden Templates dafür geschrieben werden. Das hat zu Konsequenz, dass die Templates erst
+			nach der Implementation der Applikation fertig gestellt werden können.
+	
+\chapter{Zeitplanung}
+	\section{Geplante Meilensteine}
+		Es sind insgesamt 6 selbst definierte und 3 vorgegebene Meilensteine
+		definiert. Die Meilensteine stimmen mit diesen im Projektplan überein.
+		Im Folgenden werden diese Meilensteine und deren Ziele erläutert.
+	
+		\subsection{Selbst definierte Meilensteine}
+			\begin{description}
+				\item[Meilenstein 1]	Ein CodeSmith Prototyp wird erstellt. Dies beinhaltet
+															die Einbindung eines Custom Tools in das Visual Studio
+															.NET und die Generierung eines einfachen Codefiles aus der
+															Definition einer XML Schema Datei. Zur Konfiguration soll
+															eine XML Datei verwendet werden können, die direkt im Visual
+															Studio .NET bearbeitet werden kann. Der Sinn dieses früh angesetzten 
+															Meilensteins ist es, zeigen zu können, ob und wie mit dem Tool CodeSmith \cite{CodeSmith}
+															die Ziele (namentlich die Codegenerierung für die HsrOrderApp\_S4)
+															erreicht werden können. 
+				\item[Meilenstein 2]	Das Technologiestudium von CodeSmith, XML Schema und der für diese
+															Arbeit relevanten Patterns ist abgeschlossen. Das Studium der Patterns
+															bezieht sich hauptsächlich auf das Lesen von Büchern, insbesondere
+															die Bücher von M. Fowler \cite{Fowler03} und von E. Gamma \cite{Gamma97}.
+															Nicht in diesem Meilenstein enthalten ist das Technologiestudium der
+															.NET Technologien, da es während der Arbeit immer andere Technologien
+															geben wird, in die man sich einarbeiten muss. Es gibt keine konkreten
+															Resultate, die vorgewiesen werden. Der Meilenstein dient lediglich dazu,
+															das nötige Basiswissen bis zu diesem Zeitpunkt zu erarbeiten.
+				\item[Meilenstein 3]	\hypertarget{milestone3}{}
+															Die Analyse beinhaltet das Studium der bestehende HsrOrderApp\_S3, die 
+															als Grundlage dieser Arbeit verwendet wird. Zudem wird eine Analyse
+															gemacht, die zeigt, bei welchen Teilen einer Applikation es sinnvoll ist,
+															generativ Code zu erzeugen und welche Patterns sich dafür eignen.
+															Aus diesen Erkenntnissen sollen mögliche Vorschläge für Verbesserungen 
+															gemacht werden, die in die HsrOrderApp\_S4 einfliessen.
+														
+															Aus jeder der genannten Analysen entsteht eine Dokumentation, die mit diesem
+															Meilenstein abgeschlossen werden soll.
+				\item[Meilenstein 4]	Aus der in Meilenstein 3 gewonnenen Erkenntnissen wird ein Design für die
+															neu zu erstellende HsrOrderApp\_S4 gemacht. Das Design 
+															wird mit diesem Meilenstein fertig gestellt.
+				\item[Meilenstein 5]	Die Implementation teilt sich zeitlich in 2 verschiedene Blöcke auf. Der 
+															erste Block wird mit dem Meilenstein 1 abgeschlossen, der zweite wird mit 
+															diesem Meilenstein abgeschlossen. Er umfasst die Implementation der HsrOrderApp\_S4
+															und die Erstellung der CodeSmith Templates.
+															Die HsrOrderApp\_S4 ist eine Erweiterung der HsrOrderApp\_S3 und soll mit Hilfe der 
+															erstellten Templates erzeugt werden können.
+				\item[Meilenstein 6]	Mit diesem Meilenstein wird die gesamte Dokumentation abgeschlossen. Vor
+															allem beinhaltet dieser Meilenstein Dokumentation wie Management Summary, Abstract,
+															Glossar, etc. Spezifische Teile der Dokumentation (wie z.B. eine Dokumentation
+															zu CodeSmith) werden bereits in den korrespondierenden Phasen fertig gestellt
+															und werden für diesen Meilenstein nur noch überarbeitet.
+			\end{description}
+		
+			\subsection{Vorgegebene Meilensteine}
+			
+				\begin{description}
+					\item[Zwischenpräsentation]	Die Zwischenpräsentation dient der Überprüfung der bis dahin 
+																			erreichten Ziele. Um konkrete Resultate vorlegen zu können, sind die
+																			selbst definierten Meilensteine mit dieses Meilenstein ab geglichen. Das 
+																			bedeutet, dass bei der Zwischenpräsentation Meilenstein 1 bis 4 fertig
+																			gestellt wurden und bereits erste Resultate des Meilensteins 5 vorliegen 
+																			sollten.
+					\item[Abgabe Diplomarbeit]	Das eigentliche Ende der Diplomarbeit. An diesem Datum muss die Dokumentation
+																			und die Implementation vollständig abgeschlossen werden und die Resultate
+																			dem Betreuer abgegeben werden.
+					\item[Ausstellung und Vorführung]
+																			An diesem Tag findet eine öffentliche Ausstellung der Diplomarbeiten statt.
+																			Dazu müssen vorgängig Ausstellungs-Plakate erstellt werden und die Arbeitsplätze 
+																			werden für die Vorführungen eingerichtet.
+				\end{description}
+				
+	%----------
+	\section{Erreichte Meilensteine}
+		\subsection{Meilenstein 1}
+			Dieser Meilenstein wurde Zeitgerecht fertig gestellt. Es wurde eine XML Schema Beschreibung erstellt,
+			aus der ein Codefile generiert wurde. Zudem konnte es ebenfalls direkt aus dem Visual Studio .NET
+			ausgeführt werden.
+		\subsection{Meilenstein 2}
+			Dieser Meilenstein wurde ebenfalls zeitgerecht erreicht. Wobei hierzu zu sagen ist, dass dieser
+			Meilenstein eher virtueller Natur ist. Konkrete Resultate wurden hier nicht geliefert. Trotzdem
+			haben wir uns bis dahin mit den Grundlegenden Technologien vertraut gemacht, was vor allem das
+			Studium der Patterns und von XML Schema beinhaltete.
+		\subsection{Meilenstein 3}
+			Dieser Meilenstein ist etwas vage formuliert und aus diesem Grund schwierig einzustufen. Trotzdem
+			haben wir bis zu diesem Meilenstein dessen Ziele erreicht. Die Ergebnisse waren eher implizit, da
+			wenig konkrete Arbeiten daraus resultieren. Es war evtl. nicht sinnvoll, diesen Meilenstein überhaupt
+			zu definieren.
+		\subsection{Meilenstein 4}
+			Das Design wurde bis zu diesem Zeitpunkt grösstenteils fertiggestellt. Trotzdem haben wir
+			auch nach diesem Meilenstein noch Änderungen vorgenommen. Der Grund dafür ist, dass wir während
+			den Tests noch Unschönheiten am Design feststellten. Trotz dieser Änderungen erachten
+			wir diesen Meilenstein als erreicht.
+		\subsection{Meilenstein 5}
+			Die Implementation hat sich herausgezögert. Dieser Termin war sehr optimistisch 
+			angelegt. Wir haben ihn leider verpasst und haben auch in der letzten Woche noch implementiert.
+			Dieser Teil der Implementation bezog sich aber vor allem auf die Tests. Mit dem Templates und
+			der HsrOrderApp\_S4 waren wir zum Zeitpunkt dieses Meilensteins bereits fertig. Da unser
+			Ziel aber war, die Implementationen vollständig abzuschliessen, erachten wir diesen Meilenstein
+			als nicht erreicht.
+		\subsection{Meilenstein 6}
+			Die Abgabe wurde eingehalten und somit ist der Meilenstein erreicht.
+		
+	%----------
+	\section{Zeitaufstellung}
+		Pro Woche sind $50h$ pro Person von der HSR vorgegeben. Dies entspricht
+		einem totalen Pensum von $~ 750h$. Die folgende Tabelle fasst die 
+		geschätzten und die tatsächlichen Stunden pro Kategorie zusammen. Die Stunden
+		gelten jeweils als Total der von beiden Diplomanden aufgewendeten Stunden.
+	
+		\LTXtable{\linewidth}{./files/inc/tables/projektMgmtTime}
+	
+		\begin{figure}[htb]
+			\begin{center}
+				\includegraphics[width=\linewidth]{./files/inc/figures/pmZeit}
+				\caption{\label{fig:pmZeit} Zeiterfassung}
+			\end{center}
+		\end{figure}
+	
+	%----------
+	\section{Sitzungen}
+		
+		\subsection{Sitzung mit Betreuer}
+		\begin{tabbing}
+			\hspace*{2cm}\= \kill
+			Wann:	\> Wöchentlich, normalerweise montags.\\
+			Wer:	\> H. Huser, M. Egli, M. Winiger\\
+			Was:	\> Wochenziele definieren, Probleme besprechen.
+		\end{tabbing}
+		
+		\subsection{Teamsitzung}
+		\begin{tabbing}
+			\hspace*{2cm}\= \kill
+			Wann:	\> Täglich um 8.00 Uhr\\
+			Wer:	\> M. Egli, M. Winiger\\
+			Was:	\> Tagesziel definieren.
+		\end{tabbing}
+		
+\chapter{Ressourcen}
+\label{cha:ressourcen}
+	\LTXtable{\linewidth}{./files/inc/tables/projektMgmtResources}

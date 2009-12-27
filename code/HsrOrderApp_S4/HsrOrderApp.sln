@@ -1,0 +1,37 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLayer", "BusinessLayer\BusinessLayer.csproj", "{87944798-3E32-4289-979A-CE7116EC6FCB}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderAppTest", "OrderAppTest\OrderAppTest.csproj", "{9BC6363C-26B7-4220-ADEF-AF2B58FD971C}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebServiceInterface", "http://localhost/HsrOrderApp_S4/WebServiceInterface.csproj", "{B8CD89B0-95B3-43E8-B802-98442D607B9F}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{87944798-3E32-4289-979A-CE7116EC6FCB}.Debug.ActiveCfg = Debug|.NET
+		{87944798-3E32-4289-979A-CE7116EC6FCB}.Debug.Build.0 = Debug|.NET
+		{87944798-3E32-4289-979A-CE7116EC6FCB}.Release.ActiveCfg = Release|.NET
+		{87944798-3E32-4289-979A-CE7116EC6FCB}.Release.Build.0 = Release|.NET
+		{9BC6363C-26B7-4220-ADEF-AF2B58FD971C}.Debug.ActiveCfg = Debug|.NET
+		{9BC6363C-26B7-4220-ADEF-AF2B58FD971C}.Debug.Build.0 = Debug|.NET
+		{9BC6363C-26B7-4220-ADEF-AF2B58FD971C}.Release.ActiveCfg = Release|.NET
+		{9BC6363C-26B7-4220-ADEF-AF2B58FD971C}.Release.Build.0 = Release|.NET
+		{B8CD89B0-95B3-43E8-B802-98442D607B9F}.Debug.ActiveCfg = Debug|.NET
+		{B8CD89B0-95B3-43E8-B802-98442D607B9F}.Debug.Build.0 = Debug|.NET
+		{B8CD89B0-95B3-43E8-B802-98442D607B9F}.Release.ActiveCfg = Release|.NET
+		{B8CD89B0-95B3-43E8-B802-98442D607B9F}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
